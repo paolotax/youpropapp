@@ -5,7 +5,14 @@ app/pixate_code.rb
 resources/*.nib
 resources/*.momd
 resources/*.storyboardc
+resources/*/*.storyboardc
+ib.xcodeproj
+*.storyboardc
+
 .DS_Store
+
+vendor/Pods/*
+
 nbproject
 .redcar
 #*#
