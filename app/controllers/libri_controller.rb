@@ -33,6 +33,10 @@ class LibriController < UIViewController
     self.tableView.reloadData
   end
 
+  def close(sender)
+    self.dismissViewControllerAnimated(true, completion:nil)
+  end
+
   def searchDisplayController(controller, shouldReloadTableForSearchString:searchString)
     Libro.reset  
     @searchString = searchString
@@ -66,43 +70,40 @@ class LibriController < UIViewController
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
     
     cell = self.tableView.dequeueReusableCellWithIdentifier("cellLibro")
-    cell ||= LibroCell.alloc.initWithStyle(UITableViewCellStyleDefault, euseIdentifier:"cellLibro")
+    cell ||= LibroCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:"cellLibro")
     
     libro = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
     
     cell.labelTitolo.text = libro.titolo
-
-
     if cell.imageDownloadTask
       cell.imageDownloadTask.cancel
     end
-  
-    cell.imageCopertina.image = nil
 
-      imageURL = NSURL.URLWithString libro.image_url
-      if (imageURL) 
-        cell.imageDownloadTask = @session.dataTaskWithURL(imageURL,
-          completionHandler: 
-            lambda do |data, response, error|
-              if error
-                NSLog("ERROR: %@", error)
-              else
-               
-                httpResponse = response;
-                if (httpResponse.statusCode == 200)
-                  image = UIImage.imageWithData(data)                
-                  Dispatch::Queue.main.async do
-                    cell.imageCopertina.image = image;
-                  end
-                else
-                  NSLog("Couldn't load image at URL: %@", imageURL)
-                  NSLog("HTTP %d", httpResponse.statusCode)
+    cell.imageCopertina.image = nil
+    imageURL = NSURL.URLWithString libro.image_url
+    if (imageURL) 
+      cell.imageDownloadTask = @session.dataTaskWithURL(imageURL,
+        completionHandler: 
+          lambda do |data, response, error|
+            if error
+              NSLog("ERROR: %@", error)
+            else
+             
+              httpResponse = response;
+              if (httpResponse.statusCode == 200)
+                image = UIImage.imageWithData(data)                
+                Dispatch::Queue.main.async do
+                  cell.imageCopertina.image = image;
                 end
+              else
+                NSLog("Couldn't load image at URL: %@", imageURL)
+                NSLog("HTTP %d", httpResponse.statusCode)
               end
             end
-          )
-        cell.imageDownloadTask.resume
-      end
+          end
+        )
+      cell.imageDownloadTask.resume
+    end
 
     cell
   end

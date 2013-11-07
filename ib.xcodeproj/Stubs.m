@@ -333,6 +333,18 @@
 @implementation DynamicController
 @end
 
+@implementation EditPrezzoViewController
+@end
+
+@implementation EditReminderController
+@end
+
+@implementation EditStatoViewController
+@end
+
+@implementation EditTextViewController
+@end
+
 @implementation LibriController
 @end
 
@@ -342,7 +354,13 @@
 @implementation MenuController
 @end
 
+@implementation RigaFormController
+@end
+
 @implementation SearchClienteController
+@end
+
+@implementation ImporterResult
 @end
 
 @implementation EKEventEditViewController
@@ -441,10 +459,16 @@
 @implementation AppuntoCell
 @end
 
+@implementation AppuntoCellAuto
+@end
+
 @implementation ClienteCell
 @end
 
 @implementation LibroCell
+@end
+
+@implementation RigaCell
 @end
 
 @implementation CircleButton

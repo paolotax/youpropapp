@@ -7,10 +7,10 @@ class DynamicController < UIViewController
   FILTRI = ["nel baule", "da fare", "in sospeso", "tutti"]
   
   COLORS = [
-    "#FF9500".uicolor,
-    "#5AD427".uicolor,
-    "#FF2D55".uicolor,
-    "#37BFEF".uicolor
+    "#ff7f00".uicolor,
+    "#5ad535".uicolor,
+    "#f80e57".uicolor,
+    "#259cf3".uicolor
   ]
 
   def viewDidLoad
@@ -21,9 +21,10 @@ class DynamicController < UIViewController
 
     self.searchDisplayController.searchResultsTableView.separatorColor = UIColor.lightGrayColor
     
-    self.searchDisplayController.searchResultsTableView.backgroundColor = UIColor.clearColor
+    self.searchDisplayController.searchResultsTableView.backgroundColor = UIColor.whiteColor
+
+    self.searchDisplayController.searchResultsTableView.tintColor = "#FF2D55".uicolor
     
-    self.searchDisplayController.searchResultsTableView.indicatorStyle = UIScrollViewIndicatorStyleWhite
 
   
     # 1. add the lower background layer
@@ -47,7 +48,11 @@ class DynamicController < UIViewController
     @searchBar.placeholder = "Cerca clienti"
     @searchBar.delegate = self
     self.searchDisplayController.searchBar = @searchBar    
-    @searchBar.searchBarStyle = UISearchBarStyleMinimal
+    
+    @searchBar.setBackgroundImage UIImage.new
+    @searchBar.setTranslucent true
+
+    #@searchBar.searchBarStyle = UISearchBarStyleMinimal
     self.view.addSubview @searchBar
     
 
@@ -61,10 +66,10 @@ class DynamicController < UIViewController
     
     # add the view controllers
     @views = NSMutableArray.new
-    offset = 290.0
+    offset = 340.0
     for filtro in FILTRI
       @views.addObject(self.addClientiAtOffset(offset, forFilter:filtro))
-      offset -= 60.0
+      offset -= 77.0
     end
 
   end
@@ -87,9 +92,6 @@ class DynamicController < UIViewController
   def addClientiAtOffset(offset, forFilter:filtro)
 
     frameForView = CGRectOffset(self.view.bounds, 0.0, self.view.bounds.size.height - offset)
-
-
-    puts frameForView.size.height
     
     # 1. create the view controller
     mystoryboard = UIStoryboard.storyboardWithName("MainPhone", bundle:nil)
@@ -99,9 +101,7 @@ class DynamicController < UIViewController
     view = viewController.view
     view.frame = frameForView    
     viewController.titolo = filtro
-    viewController.labelTitolo.text = filtro
     viewController.color = COLORS[FILTRI.index(filtro)]
-    viewController.loadData(filtro)
     
     # 3. add as a child
     self.addChildViewController(viewController)
@@ -356,6 +356,8 @@ class DynamicController < UIViewController
 
       cell = tableView.cellForRowAtIndexPath indexPath
       cliente = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
+      
+
       if Device.ipad?
         nav = mainVC.detailVC.clientiVC.navigationController
         dvc = self.storyboard.instantiateViewControllerWithIdentifier("ClienteDetail")
@@ -372,7 +374,10 @@ class DynamicController < UIViewController
         dvc = self.storyboard.instantiateViewControllerWithIdentifier("ClienteDetail")
         dvc.cliente = cliente
         dvc.titolo  = whichView.titolo
-        nav.pushViewController(dvc, animated:true)
+
+        whichView.clientiVC.scrollToClienteAndPush(cliente)
+
+        #nav.pushViewController(dvc, animated:true)
 
         self.searchDisplayController.setActive false
       end

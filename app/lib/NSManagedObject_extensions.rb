@@ -3,6 +3,14 @@ class NSManagedObject
   def self.setSectionKey(sectionKey)
     @sectionKey = sectionKey
   end  
+
+  def self.setSortKeys(sortKeys)
+    @sortKeys = sortKeys
+  end  
+
+  def self.setSortOrders(sortOrders)
+    @sortOrders = sortOrders
+  end  
   
   def self.entity
     @entity ||= NSEntityDescription.newEntityDescriptionWithName(name, attributes:@attributes, relationships:@relationships)
@@ -57,27 +65,39 @@ class NSManagedObject
     end
   end
 
-  def save_to_backend
-    if self.remote_id == 0  
-      Store.shared.backend.postObject(self, path:nil, parameters:nil, 
-                          success:lambda do |operation, result|
-                                    Store.shared.persist
-                                    "appuntiListDidLoadBackend".post_notification
-                                    "reload_appunti_collections".post_notification
-                                    "clientiListDidLoadBackend".post_notification
-                                  end, 
-                          failure:lambda do |operation, error|
-                                  end)
-    else
-      Store.shared.backend.putObject(self, path:nil, parameters:nil, 
-                          success:lambda do |operation, result|
-                                    Store.shared.persist  
-                                    "appuntiListDidLoadBackend".post_notification
-                                    "reload_appunti_collections".post_notification
-                                    "clientiListDidLoadBackend".post_notification   
-                                  end, 
-                          failure:lambda do |operation, error|
-                                  end)
+  def save_to_backend(&callback)
+    Store.shared.login do
+      if self.remote_id == 0  
+        Store.shared.backend.postObject(self, path:nil, parameters:nil, 
+                            success:lambda do |operation, responseObject|
+
+                                      result = ImporterResult.new(operation, responseObject, nil)
+                                      
+                                      callback.call(result)
+
+                                    end, 
+                            failure:lambda do |operation, error|
+                                      result = ImporterResult.new(operation, nil, error)
+
+                                      callback.call(result)
+                                      App.alert("#{error.localizedDescription}")
+                                    end)
+      else
+        Store.shared.backend.putObject(self, path:nil, parameters:nil, 
+                            success:lambda do |operation, responseObject|
+
+                                      result = ImporterResult.new(operation, responseObject, nil)
+                                      
+                                      callback.call(result)
+
+                                    end, 
+                            failure:lambda do |operation, error|
+                                      result = ImporterResult.new(operation, nil, error)
+
+                                      callback.call(result)
+                                      App.alert("#{error.localizedDescription}")
+                                    end)
+      end
     end
   end
 

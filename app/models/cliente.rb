@@ -28,7 +28,8 @@ class Cliente < NSManagedObject
     { name: 'appunti_in_sospeso', type: NSInteger16AttributeType, default: nil, optional: true, transient: false, indexed: false},
     { name: 'nel_baule',          type: NSBooleanAttributeType, default: 0, optional: true, transient: false, indexed: false},
     { name: 'fatto',              type: NSBooleanAttributeType, default: 0, optional: true, transient: false, indexed: false},
-    { name: 'provincia_e_comune', type: NSStringAttributeType,  default: nil, optional: true, transient: true,  indexed: false} 
+    { name: 'provincia_e_comune', type: NSStringAttributeType,  default: nil, optional: true, transient: true,  indexed: false},
+    { name: 'uuid',              type: NSStringAttributeType,    default: nil,  optional: true, transient: false, indexed: false} 
   ]
 
   @relationships = [
@@ -37,9 +38,9 @@ class Cliente < NSManagedObject
   ]
 
   def provincia_e_comune
-    self.willAccessValueForKey("provincia_e_comune")
-    tmp = "#{self.provincia} #{self.comune}"
-    self.didAccessValueForKey("provincia_e_comune")
+    #self.willAccessValueForKey("provincia_e_comune")
+    tmp = "#{self.provincia} #{self.comune} - #{self.nome}"
+    #self.didAccessValueForKey("provincia_e_comune")
     tmp
   end
 
@@ -195,7 +196,7 @@ class Cliente < NSManagedObject
 
   end
 
-  def self.con_appunti_in_sospeso
+  def self.in_sospeso
 
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -214,7 +215,7 @@ class Cliente < NSManagedObject
     countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(key))
 
     expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("con_appunti_in_sospeso")
+    expressionDescription.setName("in_sospeso")
     expressionDescription.setExpression(countExpression)
     expressionDescription.setExpressionResultType(NSInteger32AttributeType)
 
@@ -229,7 +230,7 @@ class Cliente < NSManagedObject
     data
   end
 
-  def self.con_appunti_in_sospeso_controller
+  def self.in_sospeso_controller
 
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -248,7 +249,7 @@ class Cliente < NSManagedObject
     }
 
     error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:nil, cacheName:nil)      
+    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
     unless controller.performFetch(error_ptr)
       raise "Error when fetching data: #{error_ptr[0].description}"
     end
@@ -256,7 +257,7 @@ class Cliente < NSManagedObject
     controller
   end
 
-  def self.con_appunti_da_fare
+  def self.da_fare
 
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -275,7 +276,7 @@ class Cliente < NSManagedObject
 
 
     expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("con_appunti_da_fare")
+    expressionDescription.setName("da_fare")
     expressionDescription.setExpression(countExpression)
     expressionDescription.setExpressionResultType(NSInteger32AttributeType)
 
@@ -289,7 +290,7 @@ class Cliente < NSManagedObject
     data
   end
 
-  def self.con_appunti_da_fare_controller
+  def self.da_fare_controller
 
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -307,7 +308,7 @@ class Cliente < NSManagedObject
     }
 
     error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:nil, cacheName:nil)      
+    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
     unless controller.performFetch(error_ptr)
       raise "Error when fetching data: #{error_ptr[0].description}"
     end

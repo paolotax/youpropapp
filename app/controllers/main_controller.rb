@@ -85,7 +85,7 @@ class MainController < UIViewController
       @importer.importa_classi do |result|
         @importer.importa_libri do |result|
           @importer.importa_adozioni do |result|
-            @importer.importa_appunti do |result|
+            @importer.importa_appunti(nil) do |result|
                @importer.importa_righe do |result|               
                 Store.shared.persist
                 puts "finito"

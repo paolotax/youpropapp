@@ -43,7 +43,7 @@ class Store
         token = result.object['access_token']        
         @token = token
 
-        self.backend.HTTPClient.setDefaultHeader("Authorization", value: "Bearer #{token}")
+        self.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
 
         block.call
       else
@@ -126,7 +126,7 @@ class Store
 
     error = Pointer.new(:object)
     unless @store.resetPersistentStores(error)
-      raise "Imporssibile eliminare lo store"
+      raise "Impossibile eliminare lo store"
     end
     initialize
   end

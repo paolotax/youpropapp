@@ -15,18 +15,20 @@ class ClienteDetailController < UIViewController
     @refreshControl.addTarget(self, action:"loadFromBackend", forControlEvents:UIControlEventValueChanged)
     self.tableView.addSubview(@refreshControl)
 
-    self.tableView.registerClass(AppuntoCell, forCellReuseIdentifier:"cellAppuntoBis")
+    #self.tableView.registerClass(AppuntoCell, forCellReuseIdentifier:"cellAppunto")
 
   end
 
   def viewDidAppear(animated)
     super
-    "#{titolo}changeTitolo".post_notification( self, titolo: cliente.nome )
+    "#{titolo}changeTitolo".post_notification( self, titolo: cliente.nome, sottotitolo: nil )
 
     NSNotificationCenter.defaultCenter.addObserver(self,
                                              selector:"contentSizeCategoryChanged:",
                                                  name:UIContentSizeCategoryDidChangeNotification,
                                                object:nil)
+
+    reload
   end
 
 
@@ -43,6 +45,13 @@ class ClienteDetailController < UIViewController
     self.tableView.reloadData
   end
 
+  def reload
+    @sorted_appunti = nil
+    @appunti_da_fare = nil
+    @appunti_in_sospeso = nil
+    @appunti_completati = nil
+    self.tableView.reloadData
+  end
 
 
   def appunti_da_fare
@@ -70,6 +79,32 @@ class ClienteDetailController < UIViewController
     @sorted_appunti
   end
 
+  # Storyboard methods
+  def prepareForSegue(segue, sender:sender)
+    
+    if segue.identifier.isEqualToString("newAppunto")
+      controller = segue.destinationViewController.topViewController
+      controller.cliente = cliente
+      controller.isNew = true
+      controller.presentedAsModal = true
+    
+    elsif segue.identifier.isEqualToString("editAppunto")
+      controller = segue.destinationViewController.topViewController
+      controller.cliente = cliente
+      indexPath = self.tableView.indexPathForCell(sender)
+      if indexPath.section == 0
+        appunto = appunti_da_fare.objectAtIndex( indexPath.row )
+      elsif indexPath.section == 1
+        appunto = appunti_in_sospeso.objectAtIndex( indexPath.row )
+      else
+        appunto = appunti_completati.objectAtIndex( indexPath.row )
+      end
+      controller.appunto = appunto
+      controller.isNew = false
+      controller.presentedAsModal = true
+    end
+  end
+
 
   def numberOfSectionsInTableView(tableView)
     if cliente 
@@ -95,9 +130,9 @@ class ClienteDetailController < UIViewController
 
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
    
-    cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoBis", forIndexPath:indexPath)
+    cell = tableView.dequeueReusableCellWithIdentifier("cellAppunto", forIndexPath:indexPath)
     
-    cell.updateFonts
+    #cell.updateFonts
     
     if indexPath.section == 0
       appunto = appunti_da_fare.objectAtIndex( indexPath.row )
@@ -127,16 +162,12 @@ class ClienteDetailController < UIViewController
       cell.imageStatus.highlightedImage = nil
     end
 
-    cell.setNeedsUpdateConstraints
+    #cell.setNeedsUpdateConstraints
     cell
   end
 
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
 
-    cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoBis")
-    
-    cell.updateFonts
-    
     if indexPath.section == 0
       appunto = appunti_da_fare.objectAtIndex( indexPath.row )
     elsif indexPath.section == 1
@@ -145,26 +176,52 @@ class ClienteDetailController < UIViewController
       appunto = appunti_completati.objectAtIndex( indexPath.row )
     end     
 
-    cell.labelDestinatario.text =  appunto.destinatario
-    cell.labelNote.text = appunto.note_e_righe
-    
-    cell.labelNote.preferredMaxLayoutWidth = tableView.bounds.size.width - (78.0)
-    
-    if appunto.totale_copie != 0
-      cell.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
-    else
-      cell.labelTotali.text = nil
-    end
+    font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
+    noteText = appunto.note_e_righe
 
-    cell.setNeedsUpdateConstraints
-    cell.updateConstraintsIfNeeded
-    cell.contentView.setNeedsLayout
-    cell.contentView.layoutIfNeeded
+    boundingRect = noteText.boundingRectWithSize(CGSizeMake(150, 4000),
+                                   options:(NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading),
+                                attributes:{ NSFontAttributeName: font },
+                                  context:nil)
+    boundingSize = boundingRect.size
+
+    puts "boundingSize height #{boundingSize.height} width #{boundingSize.width}"
     
-    height = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height    
+    return ( 60 + boundingSize.height)
+
+    # NON CANCELLARE 
+    # cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto")
     
-    height = [height, 48].max
-    height
+    # cell.updateFonts
+    
+    # if indexPath.section == 0
+    #   appunto = appunti_da_fare.objectAtIndex( indexPath.row )
+    # elsif indexPath.section == 1
+    #   appunto = appunti_in_sospeso.objectAtIndex( indexPath.row )
+    # else
+    #   appunto = appunti_completati.objectAtIndex( indexPath.row )
+    # end     
+
+    # cell.labelDestinatario.text =  appunto.destinatario
+    # cell.labelNote.text = appunto.note_e_righe
+    
+    # cell.labelNote.preferredMaxLayoutWidth = tableView.bounds.size.width - (78.0)
+    
+    # if appunto.totale_copie != 0
+    #   cell.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
+    # else
+    #   cell.labelTotali.text = nil
+    # end
+
+    # cell.setNeedsUpdateConstraints
+    # cell.updateConstraintsIfNeeded
+    # cell.contentView.setNeedsLayout
+    # cell.contentView.layoutIfNeeded
+    
+    # height = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height    
+    
+    # height = [height, 48].max
+    # height
   end
 
   def tableView(tableView, titleForHeaderInSection:section)
@@ -186,35 +243,13 @@ class ClienteDetailController < UIViewController
 
     def loadFromBackend
       params = { q: cliente.ClienteId }
-
-      Store.shared.login do
-        Store.shared.backend.getObjectsAtPath(
-          "api/v1/appunti",
-        parameters: params,
-           success: lambda do |operation, result|
-                      Store.shared.backend.getObjectsAtPath(
-                        "api/v1/righe",
-                        parameters: params,
-                           success: lambda do |operation, result|
-                                      @refreshControl.endRefreshing unless @refreshControl.nil?
-                                      self.tableView.reloadData
-                                    end,
-                           failure: lambda do |operation, error|
-                                       @refreshControl.endRefreshing unless @refreshControl.nil?
-                                       App.alert("#{error.localizedDescription}")
-                                     end                              
-                      )
-                    end,
-           failure: lambda do |operation, error|
-                      @refreshControl.endRefreshing unless @refreshControl.nil?
-                      App.alert("#{error.localizedDescription}")
-                    end)
+      DataImporter.default.importa_appunti(params) do |result|
+        @refreshControl.endRefreshing unless @refreshControl.nil?
+        if result.success?
+          self.tableView.reloadData
+        end  
       end
     end
-
-
-
-
 
 
 end

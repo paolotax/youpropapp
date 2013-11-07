@@ -782,12 +782,20 @@
 
 @end
 
-@interface AppuntoFormController: UIViewController
-
-@property IBOutlet id container1;
-@property IBOutlet id container2;
-
+@interface AppuntoFormController: UITableViewController
 -(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) viewDidAppear:(id) animated;
+-(IBAction) changes:(id) sender;
+-(IBAction) didSave:(id) sender;
+-(IBAction) viewWillDisappear:(id) sender;
+-(IBAction) save2:(id) sender;
+-(IBAction) cancel2:(id) sender;
+-(IBAction) save:(id) sender;
+-(IBAction) print_appunto;
+-(IBAction) cancel:(id) sender;
+-(IBAction) documentInteractionControllerViewControllerForPreview:(id) controller;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
 
 @end
 
@@ -804,6 +812,7 @@
 -(IBAction) viewDidAppear:(id) animated;
 -(IBAction) viewDidDisappear:(id) animated;
 -(IBAction) contentSizeCategoryChanged:(id) notification;
+-(IBAction) reload;
 -(IBAction) appunti_da_fare;
 -(IBAction) appunti_in_sospeso;
 -(IBAction) appunti_completati;
@@ -816,10 +825,11 @@
 @interface ClientiController: UITableViewController
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
--(IBAction) onCancel:(id) sender;
+-(IBAction) changeMode:(id) sender;
 -(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) viewDidAppear:(id) animated;
 -(IBAction) reload;
+-(IBAction) scrollToClienteAndPush:(id) cliente;
 -(IBAction) fetchControllerForTableView:(id) tableView;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 -(IBAction) buttonTappedAction:(id) sender;
@@ -830,6 +840,7 @@
 @interface DetailController: UIViewController
 
 @property IBOutlet id labelTitolo;
+@property IBOutlet id labelSottotitolo;
 @property IBOutlet id headerView;
 
 -(IBAction) viewDidLoad;
@@ -858,6 +869,63 @@
 
 @end
 
+@interface EditPrezzoViewController: UITableViewController
+
+@property IBOutlet id editPrezzo;
+@property IBOutlet id editSconto;
+
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) prezzi;
+-(IBAction) sconti;
+-(IBAction) load_data;
+-(IBAction) handleButtonDone;
+-(IBAction) showDoneButton:(id) sender;
+-(IBAction) done:(id) sender;
+-(IBAction) close:(id) sender;
+
+@end
+
+@interface EditReminderController: UIViewController
+
+@property IBOutlet id titleText;
+@property IBOutlet id dateButton;
+@property IBOutlet id tableView;
+
+-(IBAction) init;
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) viewWillDisappear:(id) animated;
+-(IBAction) handleReminderCompletion;
+-(IBAction) performEventOperations;
+-(IBAction) performReminderOperations;
+-(IBAction) dismiss;
+-(IBAction) show_date_picker;
+-(IBAction) pick_date;
+-(IBAction) close_date_picker;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
+-(IBAction) setup_date_picker;
+
+@end
+
+@interface EditStatoViewController: UITableViewController
+-(IBAction) close:(id) sender;
+
+@end
+
+@interface EditTextViewController: UIViewController
+
+@property IBOutlet id textView;
+@property IBOutlet id textField;
+
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) handleTextCompletion;
+-(IBAction) done:(id) sender;
+-(IBAction) cancel:(id) sender;
+-(IBAction) textFieldShouldReturn:(id) textField;
+
+@end
+
 @interface LibriController: UIViewController
 
 @property IBOutlet id tableView;
@@ -867,6 +935,7 @@
 -(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) viewDidAppear:(id) animated;
 -(IBAction) reload;
+-(IBAction) close:(id) sender;
 -(IBAction) fetchControllerForTableView:(id) tableView;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 -(IBAction) loadFromBackend;
@@ -898,6 +967,19 @@
 
 @end
 
+@interface RigaFormController: UITableViewController
+
+@property IBOutlet id editQuantita;
+@property IBOutlet id editPrezzo;
+
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) load_riga;
+-(IBAction) save:(id) sender;
+-(IBAction) cancel:(id) sender;
+
+@end
+
 @interface SearchClienteController: UIViewController
 
 @property IBOutlet id fakeTableView;
@@ -909,6 +991,11 @@
 -(IBAction) searchDisplayControllerDidEndSearch:(id) controller;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 -(IBAction) buttonTappedAction:(id) sender;
+
+@end
+
+@interface ImporterResult
+-(IBAction) body;
 
 @end
 
@@ -944,7 +1031,6 @@
 @interface NSManagedObject
 -(IBAction) refresh_backend;
 -(IBAction) remove_from_backend;
--(IBAction) save_to_backend;
 -(IBAction) update;
 -(IBAction) remove;
 -(IBAction) persist;
@@ -1047,12 +1133,12 @@
 -(IBAction) request_cliente_mapping;
 -(IBAction) appunto_mapping;
 -(IBAction) request_appunto_mapping;
+-(IBAction) request_riga_mapping;
 -(IBAction) riga_mapping;
 -(IBAction) classe_mapping;
 -(IBAction) request_classe_mapping;
 -(IBAction) adozione_mapping;
 -(IBAction) request_adozione_mapping;
--(IBAction) request_riga_mapping;
 
 @end
 
@@ -1121,6 +1207,15 @@
 @end
 
 @interface AppuntoCell: UITableViewCell
+
+@property IBOutlet id labelDestinatario;
+@property IBOutlet id labelNote;
+@property IBOutlet id labelTotali;
+@property IBOutlet id imageStatus;
+
+@end
+
+@interface AppuntoCellAuto: UITableViewCell
 -(IBAction) updateFonts;
 -(IBAction) updateConstraints;
 
@@ -1142,6 +1237,11 @@
 @property IBOutlet id buttonAdd;
 
 -(IBAction) pushAddButton:(id) sender;
+
+@end
+
+@interface RigaCell: UITableViewCell
+-(IBAction) riga;
 
 @end
 

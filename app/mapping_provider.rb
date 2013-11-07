@@ -119,8 +119,10 @@ class MappingProvider
     @cliente_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Cliente",
                                        inManagedObjectStore:@store)
-      mapping.identificationAttributes = [ "ClienteId" ]
+      mapping.identificationAttributes = [ "uuid" ]
       mapping.addAttributeMappingsFromDictionary(id: "ClienteId",
+
+                                               uuid: "uuid",
                                              titolo: "nome",
                                              comune: "comune",
                                            frazione: "frazione",
@@ -155,6 +157,7 @@ class MappingProvider
                                        inManagedObjectStore:@store)
 
       mapping.addAttributeMappingsFromDictionary(
+                                               uuid: "uuid",
                                              titolo: "nome",
                                              comune: "comune",
                                            frazione: "frazione",
@@ -179,8 +182,9 @@ class MappingProvider
       mapping = RKEntityMapping.mappingForEntityForName("Appunto",
                                        inManagedObjectStore:@store)
       
-      mapping.identificationAttributes = [ "remote_id" ]
+      mapping.identificationAttributes = [ "uuid" ]
       mapping.addAttributeMappingsFromDictionary(id: "remote_id",
+                                               uuid: "uuid",
                                                  destinatario: "destinatario",
                                                  note: "note",
                                                  status: "status",
@@ -193,9 +197,9 @@ class MappingProvider
                                                  cliente_nome: "cliente_nome"
                                                  )
       mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("cliente", 
-                                      toKeyPath:"cliente", withMapping:cliente_mapping))
-      # togliere e mettere
-      #mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("righe", toKeyPath:"righe", withMapping:riga_mapping))
+                                     toKeyPath:"cliente", withMapping:cliente_mapping))
+
+      mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("righe", toKeyPath:"righe", withMapping:riga_mapping))
     end 
   end
 
@@ -203,19 +207,36 @@ class MappingProvider
     @request_appunto_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Appunto", inManagedObjectStore:@store)
       mapping.addAttributeMappingsFromDictionary(destinatario: "destinatario",
+                                                 uuid: "uuid",
                                                  note: "note",
                                                  status: "status",
                                                  telefono: "telefono",
+                                                 email: "email",
                                                  cliente_id: "ClienteId")
       mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("righe_attributes", toKeyPath:"righe", withMapping:request_riga_mapping))
     end
   end
-
+  
+  def request_riga_mapping
+    @request_riga_mapping ||= begin
+      mapping = RKEntityMapping.mappingForEntityForName("Riga", inManagedObjectStore:@store)
+      
+      mapping.addAttributeMappingsFromDictionary(
+                                               uuid: "uuid",                      
+                                           libro_id: "libro_id",
+                                         fattura_id: "fattura_id",
+                                    prezzo_unitario: "prezzo_unitario",
+                                           quantita: "quantita",
+                                             sconto: "sconto")
+    end
+  end
+  
   def riga_mapping
     @riga_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Riga", inManagedObjectStore:@store)
-      mapping.identificationAttributes = [ "remote_id" ]
+      mapping.identificationAttributes = [ "uuid" ]
       mapping.addAttributeMappingsFromDictionary(id: "remote_id",
+                                               uuid: "uuid",        
                                          appunto_id: "remote_appunto_id",
                                            libro_id: "libro_id",
                                          fattura_id: "fattura_id",
@@ -228,7 +249,7 @@ class MappingProvider
                                             importo: "importo"
                                            )
       # togliere e mettere
-      mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("appunto", toKeyPath:"appunto", withMapping:appunto_mapping))
+      #mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("appunto", toKeyPath:"appunto", withMapping:appunto_mapping))
       
       mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("libro", toKeyPath:"libro", withMapping:libro_mapping))
     end
@@ -304,18 +325,6 @@ class MappingProvider
                                                  updated_at: "updated_at")
 
      end
-  end
-
-  def request_riga_mapping
-    @request_riga_mapping ||= begin
-      mapping = RKEntityMapping.mappingForEntityForName("Riga", inManagedObjectStore:@store)
-      mapping.addAttributeMappingsFromDictionary(
-                                           libro_id: "libro_id",
-                                        fattura_id: "fattura_id",
-                                    prezzo_unitario: "prezzo_unitario",
-                                           quantita: "quantita",
-                                             sconto: "sconto")
-    end
   end
 
 end
