@@ -29,30 +29,36 @@ class ClientiController < UITableViewController
 
     self.toolbarItems = [ sep, segItem, sep]
 
-    self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoBis")
+    self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoAuto")
   end
+
 
   def viewWillAppear(animated)
     super
     if Device.ipad?
       "clientiDidChange".add_observer(self, :reload)
     end
+    contentSizeChange = UIContentSizeCategoryDidChangeNotification
+    contentSizeChange.add_observer(self, "contentSizeCategoryChanged:", nil)
     reload
   end
 
-  def changeMode(sender)
-    self.mode = sender.selectedSegmentIndex
-    reload
-  end
 
   def viewWillDisappear(animated)
     super
     if Device.ipad?
       "clientiDidChange".remove_observer(self, :reload)
     end
+    contentSizeChange = UIContentSizeCategoryDidChangeNotification
+    contentSizeChange.remove_observer(self, "contentSizeCategoryChanged:")
   end
 
 
+  def contentSizeCategoryChanged(notification)
+    self.tableView.reloadData
+  end
+
+  
   def reload
     @controller = nil
     self.tableView.reloadData
@@ -65,6 +71,13 @@ class ClientiController < UITableViewController
     "#{filtro}changeTitolo".post_notification( self, titolo: filtro, sottotitolo: "#{@controller.fetchedObjects.count} #{tabella}" )
   end
 
+
+  def changeMode(sender)
+    self.mode = sender.selectedSegmentIndex
+    reload
+  end
+
+
   def scrollToClienteAndPush(cliente)
     indexPath = @controller.indexPathForObject(cliente)
     self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition:UITableViewScrollPositionTop, animated:false)
@@ -74,18 +87,47 @@ class ClientiController < UITableViewController
   end
 
 
+  def buttonTappedAction(sender)
+    buttonPosition = sender.convertPoint(CGPointZero, toView:self.tableView)
+    indexPath = self.tableView.indexPathForRowAtPoint buttonPosition
+
+    if indexPath
+      cliente = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
+      if cliente.nel_baule == 0
+        cliente.nel_baule = 1
+      else
+        cliente.nel_baule = 0
+      end
+      sender.nel_baule = cliente.nel_baule
+    end
+
+    "bauleDidChange".post_notification
+  end
 
 
   # Storyboard methods
   def prepareForSegue(segue, sender:sender)
-
-    cliente = @controller.objectAtIndexPath(self.tableView.indexPathForCell(sender)) || @controller.objectAtIndexPath(self.tableView.indexPathForSelectedRow)
     
     if segue.identifier.isEqualToString("showCliente")
+      cliente = @controller.objectAtIndexPath(self.tableView.indexPathForCell(sender)) || @controller.objectAtIndexPath(self.tableView.indexPathForSelectedRow)
+
       segue.destinationViewController.cliente = cliente
       segue.destinationViewController.titolo = filtro
+    
+    elsif segue.identifier.isEqualToString("editAppunto")
+
+      appunto = @controller.objectAtIndexPath(self.tableView.indexPathForCell(sender)) || @controller.objectAtIndexPath(self.tableView.indexPathForSelectedRow)
+
+      controller = segue.destinationViewController.topViewController
+      controller.cliente = appunto.cliente
+      indexPath = self.tableView.indexPathForCell(sender)
+      controller.appunto = appunto
+      controller.isNew = false
+      controller.presentedAsModal = true
     end
+
   end
+
 
   def fetchControllerForTableView(tableView)
 
@@ -126,9 +168,13 @@ class ClientiController < UITableViewController
     end
   end
 
+
+  # tableViewDelegates
+
   def numberOfSectionsInTableView(tableView)
     self.fetchControllerForTableView(tableView).sections.size
   end
+
 
   def tableView(tableView, heightForHeaderInSection:section)
     if mode == KClientiMode
@@ -138,14 +184,17 @@ class ClientiController < UITableViewController
     end
   end
 
+  
   def tableView(tableView, titleForHeaderInSection:section)
     self.fetchControllerForTableView(tableView).sections[section].name
   end
+  
   
   def tableView(tableView, numberOfRowsInSection:section)
     self.fetchControllerForTableView(tableView).sections[section].numberOfObjects
   end
 
+  
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
     
     if mode == KClientiMode
@@ -166,76 +215,25 @@ class ClientiController < UITableViewController
 
     elsif mode == KAppuntiMode
 
-      cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoBis", forIndexPath:indexPath)
-    
-      cell.updateFonts
-      
+      cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto", forIndexPath:indexPath)
       appunto = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
-
-      if filtro == 'tutti'
-        cell.labelDestinatario.text = "#{appunto.cliente.nome} #{appunto.destinatario}" 
-      else  
-        cell.labelDestinatario.text =  appunto.destinatario
-      end
-      cell.labelNote.text = appunto.note_e_righe
-      
-      if appunto.totale_copie != 0
-        cell.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
-      else
-        cell.labelTotali.text = nil
-      end
-
-      if appunto.status == "completato"
-        cell.imageStatus.image = "completato".uiimage
-        cell.imageStatus.highlightedImage = "completato".uiimage
-      elsif appunto.status == "in_sospeso"
-        cell.imageStatus.image = "826-money-1".uiimage
-        cell.imageStatus.highlightedImage = "826-money-1-selected".uiimage
-      else
-        cell.imageStatus.image = nil
-        cell.imageStatus.highlightedImage = nil
-      end
-
-      cell.setNeedsUpdateConstraints
+      cell.fill_data(appunto)
     end
-
     cell
   end
 
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
 
     if mode == KAppuntiMode
-      cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoBis")
-      
-      cell.updateFonts
-      
+      cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto")
       appunto = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
-
-      cell.labelDestinatario.text =  appunto.destinatario
-      cell.labelNote.text = appunto.note_e_righe + "\r\n"
-      
-      cell.labelNote.preferredMaxLayoutWidth = tableView.bounds.size.width - (78.0)
-      
-      if appunto.totale_copie != 0
-        cell.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
-      else
-        cell.labelTotali.text = nil
-      end
-
-      cell.setNeedsUpdateConstraints
-      cell.updateConstraintsIfNeeded
-      cell.contentView.setNeedsLayout
-      cell.contentView.layoutIfNeeded
-      
-      height = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height    
-      
-      height = [height, 48].max
-      height
+      cell.get_height(appunto)
     else
       54
     end
   end
 
+  
   # def tableView(tableView, titleForHeaderInSection:section)
   #   if section == 0
   #     "da fare"
@@ -246,6 +244,7 @@ class ClientiController < UITableViewController
   #   end
   # end
 
+  
   def tableView(tableView, estimatedHeightForRowAtIndexPath:indexPath)
     if mode == KAppuntiMode
       100
@@ -254,26 +253,16 @@ class ClientiController < UITableViewController
     end
   end
 
-
-
-
-
-  def buttonTappedAction(sender)
-    buttonPosition = sender.convertPoint(CGPointZero, toView:self.tableView)
-    indexPath = self.tableView.indexPathForRowAtPoint buttonPosition
-
-    if indexPath
-      cliente = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
-      if cliente.nel_baule == 0
-        cliente.nel_baule = 1
-      else
-        cliente.nel_baule = 0
-      end
-      sender.nel_baule = cliente.nel_baule
+  
+  def tableView(tableView, accessoryButtonTappedForRowWithIndexPath:indexPath)
+    
+    if mode == KAppuntiMode
+      self.performSegueWithIdentifier("editAppunto", sender:tableView.cellForRowAtIndexPath(indexPath))
     end
-
-    "bauleDidChange".post_notification
   end
+
+
+
 
   private
 

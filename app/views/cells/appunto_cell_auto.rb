@@ -10,10 +10,11 @@ class AppuntoCellAuto < UITableViewCell
   # attr_accessor :labelUpdatedAt
   # attr_accessor :imageStatus
 
-
   def initWithStyle(style, reuseIdentifier:reuseIdentifier)
 
-    super.tap do |cell|       
+    super.tap do |cell| 
+
+      cell.accessoryType = UITableViewCellAccessoryDetailButton     
 
       @labelDestinatario = UILabel.alloc.initWithFrame(CGRectZero).tap do |label|
         label.setTranslatesAutoresizingMaskIntoConstraints false
@@ -52,10 +53,65 @@ class AppuntoCellAuto < UITableViewCell
       end
         
       cell.updateFonts
-    
+      #cell.updateConstraints
     end
   end
     
+
+  def fill_data(appunto)
+
+    self.updateFonts
+    
+    self.labelDestinatario.text =  appunto.destinatario
+    self.labelNote.text = appunto.note_e_righe
+    
+    if appunto.totale_copie != 0
+      self.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
+    else
+      self.labelTotali.text = nil
+    end
+
+    if appunto.status == "completato"
+      self.imageStatus.image = "completato".uiimage
+      self.imageStatus.highlightedImage = "completato".uiimage
+    elsif appunto.status == "in_sospeso"
+      self.imageStatus.image = "826-money-1".uiimage
+      self.imageStatus.highlightedImage = "826-money-1-selected".uiimage
+    else
+      self.imageStatus.image = nil
+      self.imageStatus.highlightedImage = nil
+    end
+
+    self.setNeedsUpdateConstraints
+  end
+  
+  def get_height(appunto)
+    
+    self.updateFonts
+    
+    self.labelDestinatario.text =  appunto.destinatario
+    self.labelNote.text = appunto.note_e_righe + "\r\n"
+    
+    self.labelNote.preferredMaxLayoutWidth = 195
+    
+    if appunto.totale_copie != 0
+      self.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
+    else
+      self.labelTotali.text = nil
+    end
+
+    self.setNeedsUpdateConstraints
+    self.updateConstraintsIfNeeded
+    self.contentView.setNeedsLayout
+    self.contentView.layoutIfNeeded
+    
+    height = self.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height    
+    
+    height = [height, 48].max
+    height
+  end
+
+
   def updateFonts
     @labelDestinatario.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
     @labelNote.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption2)
@@ -208,7 +264,7 @@ class AppuntoCellAuto < UITableViewCell
                                       multiplier:1.0,
                                       constant:0))
     @didSetupConstraints = true
-
+    puts "constraints #{self}"
   end
 
   # def setupWithAppunto( appunto )

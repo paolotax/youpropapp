@@ -10,6 +10,7 @@ class DetailController < UIViewController
 
   def viewDidLoad
     super
+
     if Device.ipad?
       self.view.backgroundColor = UIColor.whiteColor
       self.view.layer.cornerRadius = 10
@@ -17,6 +18,10 @@ class DetailController < UIViewController
       self.headerView.backgroundColor = UIColor.whiteColor
       self.headerView.layer.cornerRadius = 10
     end
+  end
+
+  def scrollToTop
+    self.view.frame = CGRectMake(0, 0, 320, 568)
   end
 
   def viewWillAppear(animated)

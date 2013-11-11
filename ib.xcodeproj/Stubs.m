@@ -315,6 +315,9 @@
 @implementation AppDelegate
 @end
 
+@implementation AppuntiController
+@end
+
 @implementation AppuntoFormController
 @end
 
@@ -331,6 +334,9 @@
 @end
 
 @implementation DynamicController
+@end
+
+@implementation DynamicNewController
 @end
 
 @implementation EditPrezzoViewController

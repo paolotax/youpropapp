@@ -1,4 +1,4 @@
-class DynamicController < UIViewController
+class DynamicNewController < UIViewController
 
   extend IB
 
@@ -42,29 +42,23 @@ class DynamicController < UIViewController
     @header.center = CGPointMake(200, 190)
     self.view.addSubview(@header)
     self.addMotionEffectToView(@header, magnitude:-20.0)
-    
+        
     
     @searchBar = UISearchBar.alloc.initWithFrame([[0, 20], [320, 44]])
     @searchBar.placeholder = "Cerca clienti"
     @searchBar.delegate = self
     self.searchDisplayController.searchBar = @searchBar    
-    
     @searchBar.setBackgroundImage UIImage.new
     @searchBar.setTranslucent true
-
-    #@searchBar.searchBarStyle = UISearchBarStyleMinimal
     self.view.addSubview @searchBar
     
 
-    # add the animator
     @animator = UIDynamicAnimator.alloc.initWithReferenceView(self.view)
-
-    # gravity
     @gravity = UIGravityBehavior.alloc.init
     @animator.addBehavior(@gravity)
     @gravity.magnitude = 4.0
     
-    # add the view controllers
+
     @views = NSMutableArray.new
     offset = 340.0
     for filtro in FILTRI
@@ -92,43 +86,29 @@ class DynamicController < UIViewController
   def addClientiAtOffset(offset, forFilter:filtro)
 
     frameForView = CGRectOffset(self.view.bounds, 0.0, self.view.bounds.size.height - offset)
-    puts "frameForView x=#{frameForView.origin.x} y=#{frameForView.origin.y} w=#{frameForView.size.width} h=#{frameForView.size.height}"
-    
-    # 1. create the view controller
     mystoryboard = UIStoryboard.storyboardWithName("MainPhone", bundle:nil)
     viewController = mystoryboard.instantiateViewControllerWithIdentifier("DetailVC")
-    
-    # 2. set the frame and provide some data
     view = viewController.view
     view.frame = frameForView    
     viewController.titolo = filtro
     viewController.color = COLORS[FILTRI.index(filtro)]
-
-    puts "view #{view} x=#{view.frame.origin.x} y=#{view.frame.origin.y} w=#{view.frame.size.width} h=#{view.frame.size.height}"
-    
-    # 3. add as a child
     self.addChildViewController(viewController)
     self.view.addSubview(viewController.view)
     viewController.didMoveToParentViewController(self)
     
-    # 1. add a gesture recognizer
+
     pan = UIPanGestureRecognizer.alloc.initWithTarget(self, action:"handlePan:")
     viewController.view.addGestureRecognizer(pan)
 
-
-
-    # 2. create a collision
     collision = UICollisionBehavior.alloc.initWithItems([view])
     @animator.addBehavior(collision)
-
     # 3. lower boundary, where the tab rests
     boundary = view.frame.origin.y + view.frame.size.height + 1
     boundaryStart = CGPointMake(0.0, boundary)
     boundaryEnd = CGPointMake(self.view.bounds.size.width, boundary)
     collision.addBoundaryWithIdentifier(1,
                          fromPoint:boundaryStart,
-                           toPoint:boundaryEnd)
-    
+                           toPoint:boundaryEnd)    
     # 4. upper boundary
     boundaryStart = CGPointMake(0.0, 0.0)
     boundaryEnd = CGPointMake(self.view.bounds.size.width, 0.0)
@@ -145,7 +125,6 @@ class DynamicController < UIViewController
     @animator.addBehavior(itemBehavior)
 
 
-    # 1. add a gesture recognizer
     tap = UITapGestureRecognizer.alloc.initWithTarget(self, action:"handleTap:")
     viewController.labelTitolo.userInteractionEnabled = true
     viewController.labelTitolo.addGestureRecognizer(tap)
@@ -157,11 +136,13 @@ class DynamicController < UIViewController
   def collisionBehavior(behavior, beganContactForItem:item, withBoundaryIdentifier:identifier, atPoint:p)
     if 2.isEqual(identifier)
       view = item;
-      puts "collision up view #{view} x=#{view.frame.origin.x} y=#{view.frame.origin.y} w=#{view.frame.size.width} h=#{view.frame.size.height}"
       self.tryDockView(view)
-      view.frame = CGRectMake(0,0,320,568) 
-      puts "collision up after Dock view #{view} x=#{view.frame.origin.x} y=#{view.frame.origin.y} w=#{view.frame.size.width} h=#{view.frame.size.height}"
-
+    end
+    if 1.isEqual(identifier)
+      view = item;
+      @viewDocked = false
+      @viewDocked = nil
+      self.setAlphaWhenViewDocked(view, alpha:1.0)
     end
   end
 
@@ -202,7 +183,7 @@ class DynamicController < UIViewController
 
       # aggiungo
       if @snap
-        @animator.removeBehavior(@snap)
+        # @animator.removeBehavior(@snap)
         self.setAlphaWhenViewDocked(view, alpha:1.0)
         @viewDocked = false
         @viewDocked = nil
@@ -243,13 +224,16 @@ class DynamicController < UIViewController
 
     if viewHasReachedDockLocation
       unless @viewDocked
-        @snap = UISnapBehavior.alloc.initWithItem(view, snapToPoint:self.view.center)
-        @animator.addBehavior(@snap)
+        puts "@viewDocked"
+        view.frame = CGRectMake(0,0,320,568)
+        # @snap = UISnapBehavior.alloc.initWithItem(view, snapToPoint:self.view.center)
+        # @animator.addBehavior(@snap)
         self.setAlphaWhenViewDocked(view, alpha:0.0)
         @viewDocked = true
+        @snap = true
       end
     elsif (@viewDocked)
-      @animator.removeBehavior(@snap)
+      #@animator.removeBehavior(@snap)
       self.setAlphaWhenViewDocked(view, alpha:1.0)
       @viewDocked = false
       @viewDocked = nil

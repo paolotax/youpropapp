@@ -15,33 +15,27 @@ class ClienteDetailController < UIViewController
     @refreshControl.addTarget(self, action:"loadFromBackend", forControlEvents:UIControlEventValueChanged)
     self.tableView.addSubview(@refreshControl)
 
-    #self.tableView.registerClass(AppuntoCell, forCellReuseIdentifier:"cellAppunto")
-
+    self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoAuto")
   end
 
-  def viewDidAppear(animated)
+
+  def viewWillAppear(animated)
     super
     "#{titolo}changeTitolo".post_notification( self, titolo: cliente.nome, sottotitolo: nil )
-
-    NSNotificationCenter.defaultCenter.addObserver(self,
-                                             selector:"contentSizeCategoryChanged:",
-                                                 name:UIContentSizeCategoryDidChangeNotification,
-                                               object:nil)
-
+    contentSizeChange = UIContentSizeCategoryDidChangeNotification
+    contentSizeChange.add_observer(self, "contentSizeCategoryChanged:", nil)
     reload
   end
 
 
-  def viewDidDisappear(animated)
+  def viewWillDisappear(animated)
     super
-    NSNotificationCenter.defaultCenter.removeObserver(self,
-                                                    name:UIContentSizeCategoryDidChangeNotification,
-                                                  object:nil)
+    contentSizeChange = UIContentSizeCategoryDidChangeNotification
+    contentSizeChange.remove_observer(self, "contentSizeCategoryChanged:")
   end
 
 
   def contentSizeCategoryChanged(notification)
-    puts "contentSizeCategoryChanged"
     self.tableView.reloadData
   end
 
@@ -55,21 +49,27 @@ class ClienteDetailController < UIViewController
 
 
   def appunti_da_fare
-    @appunti_da_fare = []
-    @appunti_da_fare = sorted_appunti.select { |a| a.status != "completato" && a.status != "in_sospeso" }
-    @appunti_da_fare
+    @appunti_da_fare ||= begin
+      @appunti_da_fare = []
+      @appunti_da_fare = sorted_appunti.select { |a| a.status != "completato" && a.status != "in_sospeso" }
+      @appunti_da_fare
+    end
   end
 
   def appunti_in_sospeso
-    @appunti_in_sospeso = [] 
-    @appunti_in_sospeso = sorted_appunti.select { |a| a.status == "in_sospeso" }
-    @appunti_in_sospeso
+    @appunti_in_sospeso ||= begin
+      @appunti_in_sospeso = [] 
+      @appunti_in_sospeso = sorted_appunti.select { |a| a.status == "in_sospeso" }
+      @appunti_in_sospeso
+    end
   end
 
   def appunti_completati
-    @appunti_completati = [] 
-    @appunti_completati = sorted_appunti.select { |a| a.status == "completato" }
-    @appunti_completati
+    @appunti_completati ||= begin
+      @appunti_completati = [] 
+      @appunti_completati = sorted_appunti.select { |a| a.status == "completato" }
+      @appunti_completati
+    end
   end
 
   def sorted_appunti
@@ -102,6 +102,15 @@ class ClienteDetailController < UIViewController
       controller.appunto = appunto
       controller.isNew = false
       controller.presentedAsModal = true
+    
+    elsif segue.identifier.isEqualToString("showInSospeso")
+      controller = segue.destinationViewController
+      controller.appunti = appunti_in_sospeso
+
+    elsif segue.identifier.isEqualToString("showCompletati")
+      controller = segue.destinationViewController
+      controller.appunti = appunti_completati
+
     end
   end
 
@@ -119,9 +128,17 @@ class ClienteDetailController < UIViewController
       if section == 0
         appunti_da_fare.count
       elsif section == 1
-        appunti_in_sospeso.count
+        if appunti_in_sospeso.count > 0
+          1
+        else
+          0
+        end
       else
-        appunti_completati.count
+        if appunti_completati.count > 0
+          1
+        else
+          0
+        end
       end
     else
       0
@@ -130,98 +147,35 @@ class ClienteDetailController < UIViewController
 
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
    
-    cell = tableView.dequeueReusableCellWithIdentifier("cellAppunto", forIndexPath:indexPath)
-    
-    #cell.updateFonts
-    
     if indexPath.section == 0
+
+      cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto", forIndexPath:indexPath)
+
       appunto = appunti_da_fare.objectAtIndex( indexPath.row )
+      cell.fill_data(appunto)
+    
     elsif indexPath.section == 1
-      appunto = appunti_in_sospeso.objectAtIndex( indexPath.row )
-    else
-      appunto = appunti_completati.objectAtIndex( indexPath.row )
+      cell = tableView.dequeueReusableCellWithIdentifier("cellInSospeso", forIndexPath:indexPath)
+      cell.textLabel.text = "#{appunti_in_sospeso.count} appunti"      
+      cell.detailTextLabel.text = appunti_in_sospeso.inject(0) {|sum, a| sum + a.totale_importo.round(2)}.string_with_style(:currency)
+
+    elsif indexPath.section == 2
+      cell = tableView.dequeueReusableCellWithIdentifier("cellCompletato", forIndexPath:indexPath)
+      cell.textLabel.text = "#{appunti_completati.count} appunti"
+      cell.detailTextLabel.text = appunti_completati.inject(0) {|sum, a| sum + a.totale_importo.round(2)}.string_with_style(:currency)
     end    
-    
-    cell.labelDestinatario.text =  appunto.destinatario
-    cell.labelNote.text = appunto.note_e_righe
-    
-    if appunto.totale_copie != 0
-      cell.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
-    else
-      cell.labelTotali.text = nil
-    end
 
-    if appunto.status == "completato"
-      cell.imageStatus.image = "completato".uiimage
-      cell.imageStatus.highlightedImage = "completato".uiimage
-    elsif appunto.status == "in_sospeso"
-      cell.imageStatus.image = "826-money-1".uiimage
-      cell.imageStatus.highlightedImage = "826-money-1-selected".uiimage
-    else
-      cell.imageStatus.image = nil
-      cell.imageStatus.highlightedImage = nil
-    end
-
-    #cell.setNeedsUpdateConstraints
     cell
   end
 
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
-
     if indexPath.section == 0
+      cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto")
       appunto = appunti_da_fare.objectAtIndex( indexPath.row )
-    elsif indexPath.section == 1
-      appunto = appunti_in_sospeso.objectAtIndex( indexPath.row )
+      cell.get_height(appunto)
     else
-      appunto = appunti_completati.objectAtIndex( indexPath.row )
-    end     
-
-    font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
-    noteText = appunto.note_e_righe
-
-    boundingRect = noteText.boundingRectWithSize(CGSizeMake(150, 4000),
-                                   options:(NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading),
-                                attributes:{ NSFontAttributeName: font },
-                                  context:nil)
-    boundingSize = boundingRect.size
-
-    puts "boundingSize height #{boundingSize.height} width #{boundingSize.width}"
-    
-    return ( 60 + boundingSize.height)
-
-    # NON CANCELLARE 
-    # cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto")
-    
-    # cell.updateFonts
-    
-    # if indexPath.section == 0
-    #   appunto = appunti_da_fare.objectAtIndex( indexPath.row )
-    # elsif indexPath.section == 1
-    #   appunto = appunti_in_sospeso.objectAtIndex( indexPath.row )
-    # else
-    #   appunto = appunti_completati.objectAtIndex( indexPath.row )
-    # end     
-
-    # cell.labelDestinatario.text =  appunto.destinatario
-    # cell.labelNote.text = appunto.note_e_righe
-    
-    # cell.labelNote.preferredMaxLayoutWidth = tableView.bounds.size.width - (78.0)
-    
-    # if appunto.totale_copie != 0
-    #   cell.labelTotali.text = "#{appunto.totale_copie} copie - € #{appunto.totale_importo.round(2)}"
-    # else
-    #   cell.labelTotali.text = nil
-    # end
-
-    # cell.setNeedsUpdateConstraints
-    # cell.updateConstraintsIfNeeded
-    # cell.contentView.setNeedsLayout
-    # cell.contentView.layoutIfNeeded
-    
-    # height = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize).height    
-    
-    # height = [height, 48].max
-    # height
+      44
+    end
   end
 
   def tableView(tableView, titleForHeaderInSection:section)
@@ -235,9 +189,27 @@ class ClienteDetailController < UIViewController
   end
 
   def tableView(tableView, estimatedHeightForRowAtIndexPath:indexPath)
-    100
+    if indexPath.section == 0
+      200
+    else
+      44
+    end
   end
 
+  def navigate(sender)
+    url = NSURL.URLWithString("http://maps.apple.com/maps?q=#{cliente.latitude},#{cliente.longitude}")
+    UIApplication.sharedApplication.openURL(url);
+  end  
+
+  def makeCall(sender)
+    url = NSURL.URLWithString("tel://#{cliente.telefono.split(" ").join}")
+    UIApplication.sharedApplication.openURL(url);
+  end  
+
+  def sendEmail(sender)
+    url = NSURL.URLWithString("mailto://#{cliente.email}")
+    UIApplication.sharedApplication.openURL(url);
+  end 
 
   private
 
@@ -246,7 +218,7 @@ class ClienteDetailController < UIViewController
       DataImporter.default.importa_appunti(params) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?
         if result.success?
-          self.tableView.reloadData
+          reload
         end  
       end
     end

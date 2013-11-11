@@ -782,6 +782,18 @@
 
 @end
 
+@interface AppuntiController: UITableViewController
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) viewDidAppear:(id) animated;
+-(IBAction) viewDidDisappear:(id) animated;
+-(IBAction) contentSizeCategoryChanged:(id) notification;
+-(IBAction) reload;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
+-(IBAction) loadFromBackend;
+
+@end
+
 @interface AppuntoFormController: UITableViewController
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
@@ -818,6 +830,9 @@
 -(IBAction) appunti_completati;
 -(IBAction) sorted_appunti;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
+-(IBAction) navigate:(id) sender;
+-(IBAction) makeCall:(id) sender;
+-(IBAction) sendEmail:(id) sender;
 -(IBAction) loadFromBackend;
 
 @end
@@ -825,14 +840,14 @@
 @interface ClientiController: UITableViewController
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
--(IBAction) changeMode:(id) sender;
 -(IBAction) viewWillDisappear:(id) animated;
--(IBAction) viewDidAppear:(id) animated;
+-(IBAction) contentSizeCategoryChanged:(id) notification;
 -(IBAction) reload;
+-(IBAction) changeMode:(id) sender;
 -(IBAction) scrollToClienteAndPush:(id) cliente;
+-(IBAction) buttonTappedAction:(id) sender;
 -(IBAction) fetchControllerForTableView:(id) tableView;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
--(IBAction) buttonTappedAction:(id) sender;
 -(IBAction) loadFromBackend;
 
 @end
@@ -847,11 +862,29 @@
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) changeTitolo:(id) notification;
--(IBAction) loadData:(id) which;
+-(IBAction) loadData;
 
 @end
 
 @interface DynamicController: UIViewController
+
+@property IBOutlet id fakeTableView;
+
+-(IBAction) viewDidLoad;
+-(IBAction) handlePan:(id) gesture;
+-(IBAction) itemBehaviourForView:(id) view;
+-(IBAction) tryDockView:(id) view;
+-(IBAction) fetchControllerForTableView:(id) tableView;
+-(IBAction) searchBarShouldBeginEditing:(id) searchBar;
+-(IBAction) searchBarShouldEndEditing:(id) searchBar;
+-(IBAction) searchDisplayControllerWillBeginSearch:(id) controller;
+-(IBAction) searchDisplayControllerDidEndSearch:(id) controller;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
+-(IBAction) buttonTappedAction:(id) sender;
+
+@end
+
+@interface DynamicNewController: UIViewController
 
 @property IBOutlet id fakeTableView;
 

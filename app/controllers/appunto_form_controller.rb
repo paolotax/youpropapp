@@ -587,7 +587,7 @@ class AppuntoFormController < UITableViewController
   end
 
   def prepareForAddRigaSegue(segue, sender:sender)
-    segue.destinationViewController.appunto = @appunto
+    #segue.destinationViewController.appunto = @appunto
   end
 
   def prepareForEditRigaSegue(segue, sender:sender)
