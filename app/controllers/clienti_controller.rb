@@ -113,6 +113,7 @@ class ClientiController < UITableViewController
 
       segue.destinationViewController.cliente = cliente
       segue.destinationViewController.titolo = filtro
+      segue.destinationViewController.view.setTintColor self.view.tintColor
     
     elsif segue.identifier.isEqualToString("editAppunto")
 
@@ -217,7 +218,8 @@ class ClientiController < UITableViewController
 
       cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto", forIndexPath:indexPath)
       appunto = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
-      cell.fill_data(appunto)
+      filtro == 'tutti' ? showLabel = true : showLabel = false       
+      cell.fill_data(appunto, withCliente:showLabel)
     end
     cell
   end

@@ -36,6 +36,10 @@ class NSManagedObject
     @searchController ||= NSFetchRequest.fetchObjectsForEntityForName(name, withSectionKey:@sectionKey, withSortKeys:@sortKeys, ascending:@sortOrders, withsearchKey:@searchKey, withSearchString:searchString, withSearchScope:searchScope, inManagedObjectContext:Store.shared.context)
   end
 
+  def self.objects_to_sync
+    #@objects ||= 
+  end
+
   def refresh_backend
     Store.shared.backend.getObject(self, path:nil, parameters:nil, 
                         success:lambda do |operation, result|
@@ -48,19 +52,19 @@ class NSManagedObject
                                 end)
   end
   
-  def remove_from_backend
-
-
+  def remove_from_backend(&callback)
     if self.remote_id != 0  
-      
       Store.shared.backend.deleteObject(self, path:nil, parameters:nil, 
-                          success:lambda do |operation, result|
-                                    Store.shared.persist
-                                    "appuntiListDidLoadBackend".post_notification
-                                    "reload_appunti_collections".post_notification
-                                    "clientiListDidLoadBackend".post_notification
+                          success:lambda do |operation, responseObject|
+                                    result = ImporterResult.new(operation, responseObject, nil)
+
+                                    puts result
+                                    callback.call(result)
                                   end, 
                           failure:lambda do |operation, error|
+                                    result = ImporterResult.new(operation, nil, error)
+                                    callback.call(result)
+                                    App.alert("#{error.localizedDescription}")
                                   end)
     end
   end
@@ -72,14 +76,14 @@ class NSManagedObject
                             success:lambda do |operation, responseObject|
 
                                       result = ImporterResult.new(operation, responseObject, nil)
-                                      
                                       callback.call(result)
 
                                     end, 
                             failure:lambda do |operation, error|
+                                      
                                       result = ImporterResult.new(operation, nil, error)
-
                                       callback.call(result)
+                                      
                                       App.alert("#{error.localizedDescription}")
                                     end)
       else
@@ -87,7 +91,6 @@ class NSManagedObject
                             success:lambda do |operation, responseObject|
 
                                       result = ImporterResult.new(operation, responseObject, nil)
-                                      
                                       callback.call(result)
 
                                     end, 

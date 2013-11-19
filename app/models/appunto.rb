@@ -104,16 +104,27 @@ class Appunto < NSManagedObject
     # qui isNew? o isInserted mi da sempre false quando cancello un nuovo inserimento
     # uso lo 0 nell id ma non so
     unless self.remote_id == 0
+
       if self.status == "da_fare"
         self.cliente.appunti_da_fare -= 1
       elsif self.status == "in_sospeso"
         self.cliente.appunti_in_sospeso -= 1
       end
-      remove_from_backend
-    end
 
-    Store.shared.context.deleteObject(self)
-    Store.shared.save
+      remove_from_backend do |result|
+        if result.success?
+          Store.shared.context.deleteObject(self)
+          Store.shared.save
+          Store.shared.persist
+        else
+          puts "error"
+        end
+      end
+    else
+      Store.shared.context.deleteObject(self)
+      Store.shared.save
+      Store.shared.persist
+    end
   end
 
   def isNew? 

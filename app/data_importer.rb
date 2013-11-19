@@ -126,4 +126,36 @@ class DataImporter
                                                 end)
   end
 
+  def sync_appunti
+    Store.shared.login do
+      puts "loggato"
+      context = Store.shared.context
+
+      request = NSFetchRequest.alloc.init
+      entity = NSEntityDescription.entityForName("Appunto", inManagedObjectContext:context)
+      request.setEntity(entity)
+
+      predicate = NSPredicate.predicateWithFormat("remote_id == 0")
+      request.setPredicate(predicate)
+
+      error_ptr = Pointer.new(:object)
+      data = context.executeFetchRequest(request, error:error_ptr)
+      if data == nil
+        raise "Error when fetching data: #{error_ptr[0].description}"
+      end
+      data
+
+      for appunto in data do
+        appunto.save_to_backend do |result|
+          if result.success?
+            puts appunto.remote_id
+          else
+            puts "error"
+          end
+        end
+      end
+    end
+  end
+
+
 end

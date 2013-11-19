@@ -798,14 +798,14 @@
 -(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewDidAppear:(id) animated;
+-(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) changes:(id) sender;
 -(IBAction) didSave:(id) sender;
--(IBAction) viewWillDisappear:(id) sender;
 -(IBAction) save2:(id) sender;
--(IBAction) cancel2:(id) sender;
--(IBAction) save:(id) sender;
--(IBAction) print_appunto;
 -(IBAction) cancel:(id) sender;
+-(IBAction) save:(id) sender;
+-(IBAction) cancel2:(id) sender;
+-(IBAction) print_appunto;
 -(IBAction) documentInteractionControllerViewControllerForPreview:(id) controller;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 
@@ -821,8 +821,8 @@
 @property IBOutlet id tableView;
 
 -(IBAction) viewDidLoad;
--(IBAction) viewDidAppear:(id) animated;
--(IBAction) viewDidDisappear:(id) animated;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) contentSizeCategoryChanged:(id) notification;
 -(IBAction) reload;
 -(IBAction) appunti_da_fare;
@@ -859,6 +859,7 @@
 @property IBOutlet id headerView;
 
 -(IBAction) viewDidLoad;
+-(IBAction) scrollToTop;
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) changeTitolo:(id) notification;
@@ -871,6 +872,7 @@
 @property IBOutlet id fakeTableView;
 
 -(IBAction) viewDidLoad;
+-(IBAction) handleTap:(id) gesture;
 -(IBAction) handlePan:(id) gesture;
 -(IBAction) itemBehaviourForView:(id) view;
 -(IBAction) tryDockView:(id) view;
@@ -889,6 +891,7 @@
 @property IBOutlet id fakeTableView;
 
 -(IBAction) viewDidLoad;
+-(IBAction) handleTap:(id) gesture;
 -(IBAction) handlePan:(id) gesture;
 -(IBAction) itemBehaviourForView:(id) view;
 -(IBAction) tryDockView:(id) view;
@@ -1032,6 +1035,11 @@
 
 @end
 
+@interface DataImporter
+-(IBAction) sync_appunti;
+
+@end
+
 @interface EKEventEditViewController
 -(IBAction) saveEvent;
 -(IBAction) removeEvent;
@@ -1063,7 +1071,6 @@
 
 @interface NSManagedObject
 -(IBAction) refresh_backend;
--(IBAction) remove_from_backend;
 -(IBAction) update;
 -(IBAction) remove;
 -(IBAction) persist;
@@ -1156,6 +1163,7 @@
 
 @interface UIView
 -(IBAction) firstResponder;
+-(IBAction) viewController;
 
 @end
 
@@ -1249,6 +1257,7 @@
 @end
 
 @interface AppuntoCellAuto: UITableViewCell
+-(IBAction) get_height:(id) appunto;
 -(IBAction) updateFonts;
 -(IBAction) updateConstraints;
 

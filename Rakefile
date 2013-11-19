@@ -19,6 +19,8 @@ Motion::Project::App.setup do |app|
   app.device_family = [:iphone, :ipad]
 
   app.frameworks << 'QuartzCore'
+  app.frameworks << 'MapKit'
+  app.frameworks << 'CoreLocation'
 
   app.info_plist['UIViewControllerBasedStatusBarAppearance'] = true
   

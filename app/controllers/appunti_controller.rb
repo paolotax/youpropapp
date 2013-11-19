@@ -3,6 +3,8 @@ class AppuntiController < UITableViewController
   extend IB
   
   attr_accessor :appunti
+  attr_accessor :cliente
+
   attr_accessor :refreshControl
   attr_accessor :color
 
@@ -66,41 +68,27 @@ class AppuntiController < UITableViewController
   end
 
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
-
     cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto", forIndexPath:indexPath)
-  
-
     appunto = self.appunti[indexPath.row]
-    cell.fill_data(appunto)
-    
+    cell.fill_data(appunto, withCliente:false)
     cell
   end
 
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
-
     cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto")
     appunto = self.appunti[indexPath.row]
     cell.get_height(appunto)
-
-  end
-
-  # def tableView(tableView, titleForHeaderInSection:section)
-  #   if section == 0
-  #     "da fare"
-  #   elsif section == 1
-  #     "in sospeso"
-  #   else
-  #     "completati"
-  #   end
-  # end
-
-  def tableView(tableView, accessoryButtonTappedForRowWithIndexPath:indexPath)
-    self.performSegueWithIdentifier("editAppunto", sender:tableView.cellForRowAtIndexPath(indexPath))
   end
 
   def tableView(tableView, estimatedHeightForRowAtIndexPath:indexPath)
     200
   end
+
+  def tableView(tableView, accessoryButtonTappedForRowWithIndexPath:indexPath)
+    self.performSegueWithIdentifier("editAppunto", sender:tableView.cellForRowAtIndexPath(indexPath))
+  end
+
+
 
 
   private

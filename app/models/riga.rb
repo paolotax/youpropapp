@@ -18,11 +18,11 @@ class Riga < NSManagedObject
     { name: 'prezzo_consigliato',type: NSDecimalAttributeType,   default: 0.0, optional: true, transient: false, indexed: false},
     { name: 'sconto',            type: NSDecimalAttributeType,   default: 0.0, optional: true, transient: false, indexed: false},
     { name: 'importo',           type: NSDecimalAttributeType,   default: 0.0, optional: true, transient: false, indexed: false},
-    { name: 'uuid',              type: NSStringAttributeType,    default: nil,  optional: true, transient: false, indexed: false}    
+    { name: 'riga_uuid',              type: NSStringAttributeType,    default: nil,  optional: true, transient: false, indexed: false}    
   ]
 
   @relationships = [
-    {:name => 'appunto', :destination => 'Appunto', :inverse => 'righe' },
+    {:name => 'appunto', :destination => 'Appunto', :inverse => 'righe', optional: true },
     {:name => 'libro',   :destination => 'Libro',   :inverse => 'libro_righe' }
   ]
 

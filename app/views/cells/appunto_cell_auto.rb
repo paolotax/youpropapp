@@ -51,6 +51,12 @@ class AppuntoCellAuto < UITableViewCell
         img.setTranslatesAutoresizingMaskIntoConstraints false
         cell.contentView.addSubview(img)
       end
+
+
+      @imageCloud = UIImageView.alloc.initWithFrame(CGRectMake(5,5,15,15)).tap do |img|
+        #img.setTranslatesAutoresizingMaskIntoConstraints false
+        cell.contentView.addSubview(img)
+      end
         
       cell.updateFonts
       #cell.updateConstraints
@@ -58,11 +64,22 @@ class AppuntoCellAuto < UITableViewCell
   end
     
 
-  def fill_data(appunto)
+  def fill_data(appunto, withCliente:showLabel)
 
     self.updateFonts
     
-    self.labelDestinatario.text =  appunto.destinatario
+    if showLabel
+      self.labelDestinatario.text = "#{appunto.cliente.nome} #{appunto.destinatario}"
+    else
+      self.labelDestinatario.text =  appunto.destinatario || "##{appunto.remote_id}"
+    end
+
+    if appunto.remote_id == 0
+      @imageCloud.image = "732-cloud-upload".uiimage
+    else
+      @imageCloud.image = nil
+    end
+
     self.labelNote.text = appunto.note_e_righe
     
     if appunto.totale_copie != 0
@@ -89,7 +106,7 @@ class AppuntoCellAuto < UITableViewCell
     
     self.updateFonts
     
-    self.labelDestinatario.text =  appunto.destinatario
+    self.labelDestinatario.text =  appunto.destinatario || "##{appunto.remote_id}"
     self.labelNote.text = appunto.note_e_righe + "\r\n"
     
     self.labelNote.preferredMaxLayoutWidth = 195
@@ -118,6 +135,7 @@ class AppuntoCellAuto < UITableViewCell
     @labelTotali.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption2)
   end
 
+  
   def updateConstraints
     
     super
@@ -263,25 +281,50 @@ class AppuntoCellAuto < UITableViewCell
                                       attribute:NSLayoutAttributeHeight,
                                       multiplier:1.0,
                                       constant:0))
+
+    #### @imageCloud
+
+    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+    #                                       @imageCloud,
+    #                                   attribute:NSLayoutAttributeTrailing,
+    #                                   relatedBy:NSLayoutRelationEqual,
+    #                                   toItem:self.contentView,
+    #                                   attribute:NSLayoutAttributeTrailing,
+    #                                   multiplier:1.0,
+    #                                   constant:15.0))
+    
+    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+    #                                       @imageCloud,
+    #                                   attribute:NSLayoutAttributeTop,
+    #                                   relatedBy:NSLayoutRelationEqual,
+    #                                   toItem:self.contentView,
+    #                                   attribute:NSLayoutAttributeTop,
+    #                                   multiplier:1.0,
+    #                                   constant:10))
+   
+    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+    #                                         @imageCloud,
+    #                                   attribute:NSLayoutAttributeWidth,
+    #                                   relatedBy:NSLayoutRelationEqual,
+    #                                   toItem:@imageCloud,
+    #                                   attribute:NSLayoutAttributeWidth,
+    #                                   multiplier:1.0,
+    #                                   constant:0))
+    
+    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+    #                                        @imageCloud,
+    #                                   attribute:NSLayoutAttributeHeight,
+    #                                   relatedBy:NSLayoutRelationEqual,
+    #                                   toItem:@imageCloud,
+    #                                   attribute:NSLayoutAttributeHeight,
+    #                                   multiplier:1.0,
+    #                                   constant:0))
+
     @didSetupConstraints = true
-    puts "constraints #{self}"
+
   end
 
-  # def setupWithAppunto( appunto )
 
-
-  #   @labelDestinatario.text = appunto.destinatario
-  #   @labelNote.text = appunto.note_e_righe
-
-  #   if appunto.status == "completato"
-  #     self.imageStatus.image = "completato".uiimage
-  #     self.imageStatus.highlightedImage = "completato".uiimage
-  #   elsif appunto.status == "in_sospeso"
-  #     self.imageStatus.image = "826-money-1".uiimage
-  #     self.imageStatus.highlightedImage = "826-money-1-selected".uiimage
-  #   end
-
-  # end
 
 
 end

@@ -369,6 +369,9 @@
 @implementation ImporterResult
 @end
 
+@implementation DataImporter
+@end
+
 @implementation EKEventEditViewController
 @end
 

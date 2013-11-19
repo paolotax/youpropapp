@@ -15,22 +15,15 @@ class AppuntoFormController < UITableViewController
   def viewWillAppear(animated)
     super
 
-    puts "0. willAppear"
-    puts Store.shared.stats
-
     didChange = NSManagedObjectContextObjectsDidChangeNotification
     didChange.add_observer(self, "changes:", Store.shared.context)
 
-    # didChange = NSManagedObjectContextObjectsDidChangeNotification
-    # center = NSNotificationCenter.defaultCenter
-    # center.addObserver(self, 
-    #           selector:"changes:",
-    #               name:didChange, 
-    #             object:Store.shared.context)
-
+    didSave = NSManagedObjectContextDidSaveNotification
+    didSave.add_observer(self, "didSave:", Store.shared.context)
 
     if isNew? && !@appunto
       @appunto = Appunto.add do |a|
+        a.uuid = BubbleWrap.create_uuid.downcase
         a.cliente = cliente
         a.ClienteId = cliente.ClienteId
         a.cliente_nome = cliente.nome
@@ -38,29 +31,18 @@ class AppuntoFormController < UITableViewController
         a.status = "da_fare"
         a.created_at = Time.now
       end
-
-      puts "is inserted = #{@appunto.isInserted}"
     end 
     view.reloadData
-    puts "is inserted reloaded = #{@appunto.isInserted}"
 
     if @appunto && @appunto.isUpdated
       @appunto.updated_at = Time.now
       puts "0. updated time"
       puts Store.shared.stats
     end
-    # didSave = NSManagedObjectContextDidSaveNotification
-    # center.addObserver(self, 
-    #           selector:"didSave:",
-    #               name:didSave,
-    #             object:Store.shared.context)
 
     unless isNew?
       self.navigationItem.rightBarButtonItem = UIBarButtonItem.action {
         print_appunto
-        # url = NSURL.URLWithString("http://youpropa.com/appunti/#{@appunto.remote_id}.pdf")
-        # UIApplication.sharedApplication.openURL(url)
-
       }
     end
 
@@ -80,6 +62,9 @@ class AppuntoFormController < UITableViewController
     self.contentSizeForViewInPopover = self.tableView.contentSize
   end
 
+  def viewWillDisappear(animated)
+    super
+  end
 
   def changes(sender)
     puts "---changes---"
@@ -95,15 +80,12 @@ class AppuntoFormController < UITableViewController
   end
 
   def didSave(sender)
-    puts "---didSave---"
+    puts "---didSave--- "
+    sender.userInfo
     puts Store.shared.stats
   end
 
-  def viewWillDisappear(sender)
-    super
-    puts "---viewWillDisappear---"
-    puts Store.shared.stats
-  end
+
 
 
 
@@ -134,28 +116,20 @@ class AppuntoFormController < UITableViewController
       }
       self.navigationItem.rightBarButtonItem = UIBarButtonItem.action {
         print_appunto
-        # url = NSURL.URLWithString("http://youpropa.com/appunti/#{@appunto.remote_id}.pdf")
-        # UIApplication.sharedApplication.openURL(url)
       }
     end
   end
 
-  def cancel2(sender)
+  def cancel(sender)
   
     error = Pointer.new(:object)
     moc = @appunto.managedObjectContext
 
-    if (@appunto.isInserted)
-      moc.deleteObject @appunto 
+    if isNew?
+      moc.deleteObject @appunto
     else
       moc.refreshObject @appunto, mergeChanges:false
     end
-
-    # if isNew?
-    #   @appunto.remove
-    # else
-    #   Store.shared.context.rollback
-    # end
 
     if presentedAsModal?
       self.dismissViewControllerAnimated(true, completion:nil)
@@ -171,120 +145,55 @@ class AppuntoFormController < UITableViewController
         "pushClienteController".post_notification(self, cliente: @appunto.cliente)
       }
       self.navigationItem.rightBarButtonItem = UIBarButtonItem.action {
-
         print_appunto
-        # url = NSURL.URLWithString("http://youpropa.com/appunti/#{@appunto.remote_id}.pdf")
-        # UIApplication.sharedApplication.openURL(url)
       }
     end
   end
   
   def save(sender)
 
-    didChange = NSManagedObjectContextObjectsDidChangeNotification
-    center = NSNotificationCenter.defaultCenter
-    center.removeObserver(self, 
-                     name:didChange, 
-                   object:Store.shared.context)
-
-    # didSave = NSManagedObjectContextDidSaveNotification
-    # center.removeObserver(self, 
-    #               name:didSave,
-    #             object:Store.shared.context)
-
-    puts "---removed NSManagedObjectContextObjectsDidChangeNotification---"
-    # puts "---removed NSManagedObjectContextDidSaveNotification---"
-    if @appunto.uuid.nil? || @appunto.uuid == ""
-      @appunto.uuid = BubbleWrap.create_uuid.downcase
-    end
-
     if @appunto.isUpdated
       @appunto.updated_at = Time.now
-      puts "0. updated time"
-      puts Store.shared.stats
     end
     
-
     Store.shared.save
-    puts "1. save"
-    puts Store.shared.stats
-
     Store.shared.persist
-    puts "2. persist"
-    puts Store.shared.stats
-    
-    self.appunto.save_to_backend do
-      puts "savedToBackend"
-      self.tableView.reloadData
-    end  
-    puts "3. backend"
-    puts Store.shared.stats
-    
-    # "appuntiListDidLoadBackend".post_notification
-    # "reload_appunti_collections".post_notification
-    # "allow_dismiss_popover".post_notification
 
+    unless appunto.remote_id == 0
+      self.appunto.save_to_backend do
+        puts "savedToBackend"
+      end  
+    end
+    
     if presentedAsModal?
-      puts "4. presentedAsModal"  
-      puts Store.shared.stats
+      
       self.dismissViewControllerAnimated(true, completion:nil)
+      
+      DataImporter.default.sync_appunti
+
+      didChange = NSManagedObjectContextObjectsDidChangeNotification
+      didChange.remove_observer(self, "changes:")
+      didSave = NSManagedObjectContextDidSaveNotification
+      didSave.remove_observer(self, "didSave:")
     end
     
     if presentedInPopover?
-      puts "4. presentedInPopover"  
-      puts Store.shared.stats
       "allow_dismiss_popover".post_notification
       self.navigationController.popViewControllerAnimated(true)
     end
 
     if presentedInDetailView?
-      puts "4. presentedInDetailView"
-      puts Store.shared.stats
-      puts "ce l'ho"
-      self.navigationItem.title = "ce l'ho"
       self.navigationItem.leftBarButtonItem = UIBarButtonItem.imaged("38-house".uiimage) {
         "pushClienteController".post_notification(self, cliente: @appunto.cliente)
       }
       self.navigationItem.rightBarButtonItem = UIBarButtonItem.action {
 
         print_appunto
-        # url = NSURL.URLWithString("http://youpropa.com/appunti/#{@appunto.remote_id}.pdf")
-        # UIApplication.sharedApplication.openURL(url)
-      }
+       }
     end 
   end
 
-
-  def print_appunto
-
-    data = { appunto_ids: ["#{@appunto.remote_id}"] }
-
-    AFMotion::Client.shared.setDefaultHeader("Accept", value:"application/pdf")
-    AFMotion::Client.shared.setDefaultHeader("Authorization", value: "Bearer #{Store.shared.token}")
-    
-    AFMotion::Client.shared.put("/api/v1/appunti/print_multiple", data) do |result|
-      if result.success?
-        
-        resourceDocPath = NSString.alloc.initWithString(NSBundle.mainBundle.resourcePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent("Documents"))
-        filePath = resourceDocPath.stringByAppendingPathComponent("Sovrapacchi.pdf")
-        result.object.writeToFile(filePath, atomically:true)
-        url = NSURL.fileURLWithPath(filePath)
-        if (url) 
-          @documentInteractionController = UIDocumentInteractionController.interactionControllerWithURL(url)
-          @documentInteractionController.setDelegate(self)
-          @documentInteractionController.presentPreviewAnimated(true)
-        end
-      else
-
-        App.alert("babbeo")
-      end
-    end
-    Store.shared.login {} 
-  end
-
-
-
-  def cancel(sender)
+  def cancel2(sender)
 
     
 
@@ -292,10 +201,10 @@ class AppuntoFormController < UITableViewController
     # puts "---removed NSManagedObjectContextDidSaveNotification---"
 
     if isNew?
-      puts "1. isNew = true"
       puts Store.shared.stats
-      @appunto.remove
-      puts "2. remove"
+      Store.shared.context.deleteObject(@appunto)
+      Store.shared.save
+      Store.shared.persist
       puts Store.shared.stats
     else
       puts "1. update"
@@ -345,6 +254,38 @@ class AppuntoFormController < UITableViewController
     #             object:Store.shared.context)
 
   end 
+
+
+
+  def print_appunto
+
+    data = { appunto_ids: ["#{@appunto.remote_id}"] }
+
+    AFMotion::Client.shared.setDefaultHeader("Accept", value:"application/pdf")
+    AFMotion::Client.shared.setDefaultHeader("Authorization", value: "Bearer #{Store.shared.token}")
+    
+    AFMotion::Client.shared.put("/api/v1/appunti/print_multiple", data) do |result|
+      if result.success?
+        
+        resourceDocPath = NSString.alloc.initWithString(NSBundle.mainBundle.resourcePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent("Documents"))
+        filePath = resourceDocPath.stringByAppendingPathComponent("Sovrapacchi.pdf")
+        result.object.writeToFile(filePath, atomically:true)
+        url = NSURL.fileURLWithPath(filePath)
+        if (url) 
+          @documentInteractionController = UIDocumentInteractionController.interactionControllerWithURL(url)
+          @documentInteractionController.setDelegate(self)
+          @documentInteractionController.presentPreviewAnimated(true)
+        end
+      else
+
+        App.alert("babbeo")
+      end
+    end
+    Store.shared.login {} 
+  end
+
+
+
 
 
 
@@ -465,7 +406,9 @@ class AppuntoFormController < UITableViewController
     if indexPath.section == 1 && indexPath.row > 0
       riga = @appunto.righe.objectAtIndex(indexPath.row - 1)
       # devo per forza eliminare no _deleted
-      riga.remove
+      puts riga
+      Store.shared.context.deleteObject(riga)
+      #riga.remove
       tableView.updates do
         tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation:UITableViewRowAnimationFade)
       end
@@ -494,8 +437,6 @@ class AppuntoFormController < UITableViewController
     if buttonIndex != @actionSheet.cancelButtonIndex
 
       cliente = @appunto.cliente
-      
-      #@appunto.delete_from_backend
       
       @appunto.remove
 
@@ -587,7 +528,7 @@ class AppuntoFormController < UITableViewController
   end
 
   def prepareForAddRigaSegue(segue, sender:sender)
-    #segue.destinationViewController.appunto = @appunto
+    segue.destinationViewController.appunto = @appunto
   end
 
   def prepareForEditRigaSegue(segue, sender:sender)

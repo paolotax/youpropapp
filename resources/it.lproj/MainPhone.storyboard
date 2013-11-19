@@ -499,19 +499,19 @@
                                     </connections>
                                 </searchBar>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cellLibro" rowHeight="80" id="Qfn-eb-azX" customClass="LibroCell">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cellLibro" rowHeight="80" id="Qfn-eb-azX" customClass="LibroCell">
                                         <rect key="frame" x="0.0" y="130" width="320" height="80"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Qfn-eb-azX" id="Y84-Vd-Pgx">
-                                            <rect key="frame" x="0.0" y="0.0" width="320" height="79"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="287" height="79"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OWh-vE-kAR">
                                                     <rect key="frame" x="0.0" y="0.0" width="57" height="79"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 </imageView>
-                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" preferredMaxLayoutWidth="207" translatesAutoresizingMaskIntoConstraints="NO" id="MxD-Mf-4Ym">
-                                                    <rect key="frame" x="65" y="5" width="207" height="41"/>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" preferredMaxLayoutWidth="174" translatesAutoresizingMaskIntoConstraints="NO" id="MxD-Mf-4Ym">
+                                                    <rect key="frame" x="65" y="5" width="174" height="41"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
@@ -533,6 +533,7 @@
                                             <outlet property="buttonAdd" destination="llY-S9-a3U" id="lXP-mO-nuB"/>
                                             <outlet property="imageCopertina" destination="OWh-vE-kAR" id="ycX-K4-dF7"/>
                                             <outlet property="labelTitolo" destination="MxD-Mf-4Ym" id="9eu-p7-lGP"/>
+                                            <segue destination="U2A-ee-Zao" kind="push" id="JXZ-y0-qPH"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -572,7 +573,7 @@
                     </connections>
                 </searchDisplayController>
             </objects>
-            <point key="canvasLocation" x="1904" y="-2162"/>
+            <point key="canvasLocation" x="1963" y="-1117"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="jSB-db-3hj">
@@ -1679,5 +1680,6 @@
     <inferredMetricsTieBreakers>
         <segue reference="nm4-v7-Bkd"/>
         <segue reference="FsO-aL-y3P"/>
+        <segue reference="JXZ-y0-qPH"/>
     </inferredMetricsTieBreakers>
 </document>

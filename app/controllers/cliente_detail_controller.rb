@@ -21,6 +21,7 @@ class ClienteDetailController < UIViewController
 
   def viewWillAppear(animated)
     super
+    puts "willappear"
     "#{titolo}changeTitolo".post_notification( self, titolo: cliente.nome, sottotitolo: nil )
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.add_observer(self, "contentSizeCategoryChanged:", nil)
@@ -30,6 +31,7 @@ class ClienteDetailController < UIViewController
 
   def viewWillDisappear(animated)
     super
+    puts "willdisappear"
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.remove_observer(self, "contentSizeCategoryChanged:")
   end
@@ -106,10 +108,15 @@ class ClienteDetailController < UIViewController
     elsif segue.identifier.isEqualToString("showInSospeso")
       controller = segue.destinationViewController
       controller.appunti = appunti_in_sospeso
-
+      controller.cliente = cliente
+      controller.tableView.setTintColor self.tableView.tintColor
+    
     elsif segue.identifier.isEqualToString("showCompletati")
       controller = segue.destinationViewController
       controller.appunti = appunti_completati
+      controller.cliente = cliente
+      controller.tableView.setTintColor self.tableView.tintColor
+    
 
     end
   end
@@ -152,7 +159,7 @@ class ClienteDetailController < UIViewController
       cell = tableView.dequeueReusableCellWithIdentifier("cellAppuntoAuto", forIndexPath:indexPath)
 
       appunto = appunti_da_fare.objectAtIndex( indexPath.row )
-      cell.fill_data(appunto)
+      cell.fill_data(appunto, withCliente:false)
     
     elsif indexPath.section == 1
       cell = tableView.dequeueReusableCellWithIdentifier("cellInSospeso", forIndexPath:indexPath)
@@ -196,9 +203,25 @@ class ClienteDetailController < UIViewController
     end
   end
 
+  
+  def tableView(tableView, accessoryButtonTappedForRowWithIndexPath:indexPath)    
+    self.performSegueWithIdentifier("editAppunto", sender:tableView.cellForRowAtIndexPath(indexPath))
+  end
+
+
   def navigate(sender)
-    url = NSURL.URLWithString("http://maps.apple.com/maps?q=#{cliente.latitude},#{cliente.longitude}")
-    UIApplication.sharedApplication.openURL(url);
+
+    placemark = MKPlacemark.alloc.initWithCoordinate(cliente.coordinate, addressDictionary:nil)
+
+    mapItem = MKMapItem.alloc.initWithPlacemark(placemark)
+    
+    mapItem.name = cliente.nome
+    
+    mapItem.openInMapsWithLaunchOptions({ MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving })
+
+
+    # url = NSURL.URLWithString("http://maps.apple.com/maps?q=#{cliente.latitude},#{cliente.longitude}")
+    # UIApplication.sharedApplication.openURL(url);
   end  
 
   def makeCall(sender)

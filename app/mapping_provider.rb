@@ -220,9 +220,10 @@ class MappingProvider
   def request_riga_mapping
     @request_riga_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Riga", inManagedObjectStore:@store)
+      #mapping.identificationAttributes = [ "uuid" ]
       
       mapping.addAttributeMappingsFromDictionary(
-                                               uuid: "uuid",                      
+                                               uuid: "riga_uuid",                      
                                            libro_id: "libro_id",
                                          fattura_id: "fattura_id",
                                     prezzo_unitario: "prezzo_unitario",
@@ -234,9 +235,9 @@ class MappingProvider
   def riga_mapping
     @riga_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Riga", inManagedObjectStore:@store)
-      mapping.identificationAttributes = [ "uuid" ]
+      mapping.identificationAttributes = [ "riga_uuid" ]
       mapping.addAttributeMappingsFromDictionary(id: "remote_id",
-                                               uuid: "uuid",        
+                                               uuid: "riga_uuid",        
                                          appunto_id: "remote_appunto_id",
                                            libro_id: "libro_id",
                                          fattura_id: "fattura_id",
