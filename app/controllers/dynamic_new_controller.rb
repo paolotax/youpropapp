@@ -139,19 +139,20 @@ class DynamicNewController < UIViewController
       self.tryDockView(view)
     end
     if 1.isEqual(identifier)
+      puts "collided"
       view = item;
       @viewDocked = false
       @viewDocked = nil
-      self.setAlphaWhenViewDocked(view, alpha:1.0)
+      #self.setAlphaWhenViewDocked(view, alpha:1.0)
     end
   end
 
   def handleTap(gesture)
 
     controller = gesture.view.superview.viewController
-    self.setAlphaWhenViewDocked(controller.view, alpha:0.0)
+    #self.setAlphaWhenViewDocked(controller.view, alpha:0.0)
     controller.scrollToTop
-
+    self.moveDownViews(controller.view)
   end
 
 
@@ -189,7 +190,7 @@ class DynamicNewController < UIViewController
         @viewDocked = nil
         @snap = nil
       else
-        # 3. the gesture has ended
+        puts "# 3. the gesture has ended"
         self.tryDockView(draggedView)
       end
       
@@ -224,11 +225,14 @@ class DynamicNewController < UIViewController
 
     if viewHasReachedDockLocation
       unless @viewDocked
-        puts "@viewDocked"
+        puts "@viewDocked hasReached"
         view.frame = CGRectMake(0,0,320,568)
         # @snap = UISnapBehavior.alloc.initWithItem(view, snapToPoint:self.view.center)
         # @animator.addBehavior(@snap)
-        self.setAlphaWhenViewDocked(view, alpha:0.0)
+        
+        self.moveDownViews(view)
+        puts "@viewDocked"
+        #self.setAlphaWhenViewDocked(view, alpha:0.0)
         @viewDocked = true
         @snap = true
       end
@@ -249,7 +253,20 @@ class DynamicNewController < UIViewController
     end
   end
 
+  def moveDownViews(view)
 
+    puts "moveDown"
+
+    top = self.view.frame.size.height - 25 - 20
+    for aView in @views
+      top += 5
+      if (aView.view != view)
+        puts top
+        aView.view.frame = CGRectMake(0, top, 320, 568)
+        aView.view.alpha = 1.0
+      end
+    end
+  end
 
 
 

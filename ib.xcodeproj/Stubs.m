@@ -27,6 +27,9 @@
 @implementation InvalidFileError
 @end
 
+@implementation Layout
+@end
+
 @implementation NSMutableURLRequest
 @end
 
@@ -480,6 +483,15 @@
 @implementation RigaCell
 @end
 
+@implementation RigaCellIb
+@end
+
+@implementation TotaliCellIb
+@end
+
 @implementation CircleButton
+@end
+
+@implementation HeaderCliente
 @end
 

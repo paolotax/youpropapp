@@ -10,7 +10,10 @@ class ClienteDetailController < UIViewController
 
   def viewDidLoad
     super
- 
+
+    self.tableView.layer.cornerRadius = 10
+    self.view.backgroundColor = UIColor.clearColor
+
     @refreshControl = UIRefreshControl.alloc.init
     @refreshControl.addTarget(self, action:"loadFromBackend", forControlEvents:UIControlEventValueChanged)
     self.tableView.addSubview(@refreshControl)
@@ -21,7 +24,6 @@ class ClienteDetailController < UIViewController
 
   def viewWillAppear(animated)
     super
-    puts "willappear"
     "#{titolo}changeTitolo".post_notification( self, titolo: cliente.nome, sottotitolo: nil )
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.add_observer(self, "contentSizeCategoryChanged:", nil)
@@ -31,7 +33,6 @@ class ClienteDetailController < UIViewController
 
   def viewWillDisappear(animated)
     super
-    puts "willdisappear"
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.remove_observer(self, "contentSizeCategoryChanged:")
   end
@@ -237,7 +238,7 @@ class ClienteDetailController < UIViewController
   private
 
     def loadFromBackend
-      params = { q: cliente.ClienteId }
+      params = { cliente: cliente.ClienteId }
       DataImporter.default.importa_appunti(params) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?
         if result.success?

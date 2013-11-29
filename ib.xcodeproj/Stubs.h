@@ -56,6 +56,16 @@
 @interface InvalidFileError: StandardError
 @end
 
+@interface Layout
+-(IBAction) metrics:(id) metrics;
+-(IBAction) subviews:(id) subviews;
+-(IBAction) view:(id) view;
+-(IBAction) horizontal:(id) horizontal;
+-(IBAction) vertical:(id) vertical;
+-(IBAction) strain;
+
+@end
+
 @interface NSMutableURLRequest
 -(IBAction) url;
 -(IBAction) content_type;
@@ -795,16 +805,11 @@
 @end
 
 @interface AppuntoFormController: UITableViewController
--(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
--(IBAction) viewDidAppear:(id) animated;
--(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) changes:(id) sender;
 -(IBAction) didSave:(id) sender;
--(IBAction) save2:(id) sender;
 -(IBAction) cancel:(id) sender;
 -(IBAction) save:(id) sender;
--(IBAction) cancel2:(id) sender;
 -(IBAction) print_appunto;
 -(IBAction) documentInteractionControllerViewControllerForPreview:(id) controller;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
@@ -844,6 +849,7 @@
 -(IBAction) contentSizeCategoryChanged:(id) notification;
 -(IBAction) reload;
 -(IBAction) changeMode:(id) sender;
+-(IBAction) changeProvincia:(id) sender;
 -(IBAction) scrollToClienteAndPush:(id) cliente;
 -(IBAction) buttonTappedAction:(id) sender;
 -(IBAction) fetchControllerForTableView:(id) tableView;
@@ -895,6 +901,7 @@
 -(IBAction) handlePan:(id) gesture;
 -(IBAction) itemBehaviourForView:(id) view;
 -(IBAction) tryDockView:(id) view;
+-(IBAction) moveDownViews:(id) view;
 -(IBAction) fetchControllerForTableView:(id) tableView;
 -(IBAction) searchBarShouldBeginEditing:(id) searchBar;
 -(IBAction) searchBarShouldEndEditing:(id) searchBar;
@@ -1191,6 +1198,8 @@
 @interface Appunto: NSManagedObject
 -(IBAction) data;
 -(IBAction) note_e_righe;
+-(IBAction) calcola_importo;
+-(IBAction) calcola_copie;
 -(IBAction) remove;
 
 @end
@@ -1283,7 +1292,32 @@
 @end
 
 @interface RigaCell: UITableViewCell
--(IBAction) riga;
+-(IBAction) load_data:(id) riga;
+-(IBAction) addLabelsToSubview;
+-(IBAction) newLabelTitolo;
+-(IBAction) newLabelPrezzo;
+-(IBAction) newLabelSconto;
+-(IBAction) newLabelQuantita;
+-(IBAction) newImageCopertina;
+
+@end
+
+@interface RigaCellIb: UITableViewCell
+
+@property IBOutlet id labelTitolo;
+@property IBOutlet id labelPrezzo;
+@property IBOutlet id labelSconto;
+@property IBOutlet id labelQuantita;
+@property IBOutlet id imageCopertina;
+
+-(IBAction) load_data:(id) riga;
+
+@end
+
+@interface TotaliCellIb: UITableViewCell
+
+@property IBOutlet id labelImporto;
+@property IBOutlet id labelCopie;
 
 @end
 
@@ -1291,6 +1325,15 @@
 -(IBAction) setColor:(id) color;
 -(IBAction) nel_baule;
 -(IBAction) drawRect:(id) rect;
+
+@end
+
+@interface HeaderCliente: UITableViewHeaderFooterView
+-(IBAction) initWithReuseIdentifier:(id) reuseIdentifier;
+-(IBAction) titolo;
+-(IBAction) quantita;
+-(IBAction) toggleBaule:(id) sender;
+-(IBAction) toggleBauleWithUserAction:(id) userAction;
 
 @end
 

@@ -9,8 +9,6 @@ class EditPrezzoViewController < UITableViewController
 
   def viewWillAppear(animated)
     super
-    puts @riga.titolo
-    puts @riga.prezzo_copertina
     load_data
   end
 
@@ -43,11 +41,6 @@ class EditPrezzoViewController < UITableViewController
 
   def tableView(tableView, didSelectRowAtIndexPath:indexPath)
 
-    # if @appunto.status
-    #   previousIndexPath = NSIndexPath.indexPathForRow(STATUSES.index(@appunto.status.split("_").join(" ")), inSection:0)
-    #   cell = tableView.cellForRowAtIndexPath(previousIndexPath)
-    #   cell.accessoryType = UITableViewCellAccessoryNone
-    # end
     tableView.deselectRowAtIndexPath(indexPath, animated:true)
 
     if indexPath.row < 6

@@ -130,7 +130,7 @@ class AppuntoCellAuto < UITableViewCell
 
 
   def updateFonts
-    @labelDestinatario.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+    @labelDestinatario.font = UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)
     @labelNote.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption2)
     @labelTotali.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption2)
   end

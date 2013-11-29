@@ -10,12 +10,13 @@ class DetailController < UIViewController
 
   def viewDidLoad
     super
-
+    self.view.layer.cornerRadius = 10
+    
     if Device.ipad?
-      self.view.backgroundColor = UIColor.whiteColor
+      #self.view.backgroundColor = UIColor.whiteColor
       self.view.layer.cornerRadius = 10
     else
-      self.headerView.backgroundColor = UIColor.whiteColor
+      #self.headerView.backgroundColor = UIColor.whiteColor
       self.headerView.layer.cornerRadius = 10
     end
   end

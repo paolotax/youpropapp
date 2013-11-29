@@ -10,13 +10,15 @@ end
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
-  app.name = 'prova'
+  app.name = 'youpropa-app'
 
   app.provisioning_profile = '/Users/paolotax/Library/MobileDevice/Provisioning Profiles/B4A21FC2-6865-42E5-A2D3-FDA9D939F1A9.mobileprovision' 
   
   app.codesign_certificate = 'iPhone Developer: Paolo Tassinari (9L6JUZD52Q)' 
 
   app.device_family = [:iphone, :ipad]
+
+  app.interface_orientations = [:portrait]
 
   app.frameworks << 'QuartzCore'
   app.frameworks << 'MapKit'

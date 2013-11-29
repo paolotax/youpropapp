@@ -11,12 +11,21 @@ class ClientiController < UITableViewController
     super
 
     self.mode = KClientiMode
-    
+
+    self.tableView.layer.cornerRadius = 10
+    self.navigationController.toolbarHidden = false
+    self.navigationController.toolbar.layer.cornerRadius = 10
+    self.navigationController.toolbar.clipsToBounds = true
+ 
     @refreshControl = UIRefreshControl.alloc.init
     @refreshControl.addTarget(self, action:"loadFromBackend", forControlEvents:UIControlEventValueChanged)
     self.tableView.addSubview(@refreshControl)
 
-    self.navigationController.toolbarHidden = false
+    @segmentedProvince = UISegmentedControl.alloc.initWithItems(["tutte","RA", "RE"])
+    @segmentedProvince.setSelectedSegmentIndex(0)
+    @segmentedProvince.addTarget(self, action:"changeProvincia:", forControlEvents:UIControlEventValueChanged)
+    @segmentedProvince.delegate = self
+    self.navigationItem.titleView = @segmentedProvince
 
     @segmentedControl = UISegmentedControl.alloc.initWithItems(["Clienti", "Appunti"])
     @segmentedControl.setSelectedSegmentIndex(0)
@@ -26,10 +35,12 @@ class ClientiController < UITableViewController
  
     sep =     UIBarButtonItem.alloc.initWithBarButtonSystemItem(UIBarButtonSystemItemFlexibleSpace, target:nil, action:nil)
 
-
     self.toolbarItems = [ sep, segItem, sep]
 
     self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoAuto")
+    self.tableView.registerClass(HeaderCliente, forHeaderFooterViewReuseIdentifier:"headerCliente")
+    #self.tableView.sectionHeaderHeight = 44
+    
   end
 
 
@@ -74,6 +85,11 @@ class ClientiController < UITableViewController
 
   def changeMode(sender)
     self.mode = sender.selectedSegmentIndex
+    reload
+  end
+  
+  def changeProvincia(sender)
+    ##
     reload
   end
 
@@ -186,11 +202,6 @@ class ClientiController < UITableViewController
   end
 
   
-  def tableView(tableView, titleForHeaderInSection:section)
-    self.fetchControllerForTableView(tableView).sections[section].name
-  end
-  
-  
   def tableView(tableView, numberOfRowsInSection:section)
     self.fetchControllerForTableView(tableView).sections[section].numberOfObjects
   end
@@ -236,15 +247,37 @@ class ClientiController < UITableViewController
   end
 
   
-  # def tableView(tableView, titleForHeaderInSection:section)
-  #   if section == 0
-  #     "da fare"
-  #   elsif section == 1
-  #     "in sospeso"
-  #   else
-  #     "completati"
-  #   end
-  # end
+  def tableView(tableView, viewForHeaderInSection:section)
+
+    if mode == KAppuntiMode
+      clienteHeader = tableView.dequeueReusableHeaderFooterViewWithIdentifier("headerCliente")
+
+      cliente = self.fetchControllerForTableView(tableView).sections[section].objects.firstObject.cliente
+
+      clienteHeader.textLabel.text = cliente.nome
+      clienteHeader.textLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+    
+      clienteHeader.circle_button.setColor self.view.tintColor
+      clienteHeader.circle_button.nel_baule = cliente.nel_baule
+      
+      clienteHeader.section = section
+      clienteHeader.delegate = self
+
+      # isOpened = @sectionsOpened.include? section
+      # clienteHeader.nel_baule.selected = isOpened
+
+      # clienteHeader.titolo   = self.fetchControllerForTableView(tableView).sections[section].name
+      # clienteHeader.quantita = self.fetchControllerForTableView(tableView).sections[section].objects.valueForKeyPath("@count").to_i.to_s
+      
+      # clienteHeader.contentView.backgroundColor = UIColor.darkGrayColor
+      # clienteHeader.section = section
+      # clienteHeader.delegate = self
+      
+      clienteHeader
+    else
+      nil
+    end
+  end
 
   
   def tableView(tableView, estimatedHeightForRowAtIndexPath:indexPath)
@@ -255,7 +288,7 @@ class ClientiController < UITableViewController
     end
   end
 
-  
+
   def tableView(tableView, accessoryButtonTappedForRowWithIndexPath:indexPath)
     
     if mode == KAppuntiMode
@@ -263,7 +296,22 @@ class ClientiController < UITableViewController
     end
   end
 
+  #
+  # headerCliente delegate
+  #
+  def headerCliente(headerCliente, didTapBaule:section)
 
+    cliente = @controller.sections[section].objects.firstObject.cliente
+    if cliente.nel_baule == 0 
+      cliente.nel_baule = 1
+    else
+      cliente.nel_baule = 0
+    end
+    Store.shared.save
+    Store.shared.persist
+
+    headerCliente.circle_button.nel_baule = cliente.nel_baule
+  end
 
 
   private

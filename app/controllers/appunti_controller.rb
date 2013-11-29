@@ -94,7 +94,7 @@ class AppuntiController < UITableViewController
   private
 
     def loadFromBackend
-      params = { q: cliente.ClienteId }
+      params = { cliente: cliente.ClienteId }
       DataImporter.default.importa_appunti(params) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?
         if result.success?

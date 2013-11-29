@@ -68,8 +68,10 @@ class DynamicController < UIViewController
     @views = NSMutableArray.new
     offset = 340.0
     for filtro in FILTRI
-      @views.addObject(self.addClientiAtOffset(offset, forFilter:filtro))
-      offset -= 77.0
+      if filtro == 'nel baule'
+        @views.addObject(self.addClientiAtOffset(offset, forFilter:filtro))
+        offset -= 77.0
+      end
     end
 
   end

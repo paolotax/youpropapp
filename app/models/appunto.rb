@@ -79,6 +79,22 @@ class Appunto < NSManagedObject
     note_e_righe    
   end
 
+  def calcola_importo
+    importi = [0]
+    self.righe.each do |r|
+      importi << r.importo.round(2)
+    end    
+    importi.reduce(:+).round(2)
+  end
+
+  def calcola_copie
+    copie = [0]
+    self.righe.each do |r|
+      copie << r.quantita
+    end    
+    copie.reduce(:+)
+  end
+
   # #pragma mark -
   # #pragma mark Time stamp setter
 

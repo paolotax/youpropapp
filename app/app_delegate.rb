@@ -1,10 +1,15 @@
 include SugarCube::Adjust 
 
 class AppDelegate
+
+  attr_accessor :url_session
   
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     
     self.initAppearance
+
+    sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration
+    @url_session = NSURLSession.sessionWithConfiguration(sessionConfig)
 
     AFNetworkActivityIndicatorManager.sharedManager.enabled = true
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
