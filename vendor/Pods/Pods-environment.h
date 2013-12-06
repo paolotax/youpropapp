@@ -24,17 +24,17 @@
 #define COCOAPODS_VERSION_MINOR_ISO8601DateFormatterValueTransformer 5
 #define COCOAPODS_VERSION_PATCH_ISO8601DateFormatterValueTransformer 0
 
-// NVSlideMenuController
-#define COCOAPODS_POD_AVAILABLE_NVSlideMenuController
-#define COCOAPODS_VERSION_MAJOR_NVSlideMenuController 1
-#define COCOAPODS_VERSION_MINOR_NVSlideMenuController 5
-#define COCOAPODS_VERSION_PATCH_NVSlideMenuController 5
-
 // RKValueTransformers
 #define COCOAPODS_POD_AVAILABLE_RKValueTransformers
 #define COCOAPODS_VERSION_MAJOR_RKValueTransformers 1
 #define COCOAPODS_VERSION_MINOR_RKValueTransformers 0
 #define COCOAPODS_VERSION_PATCH_RKValueTransformers 1
+
+// RNFrostedSidebar
+#define COCOAPODS_POD_AVAILABLE_RNFrostedSidebar
+#define COCOAPODS_VERSION_MAJOR_RNFrostedSidebar 0
+#define COCOAPODS_VERSION_MINOR_RNFrostedSidebar 2
+#define COCOAPODS_VERSION_PATCH_RNFrostedSidebar 0
 
 // RestKit
 #define COCOAPODS_POD_AVAILABLE_RestKit

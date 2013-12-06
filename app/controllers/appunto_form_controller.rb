@@ -153,7 +153,7 @@ class AppuntoFormController < UITableViewController
 
   
   def numberOfSectionsInTableView(tableView)
-    4
+    5
   end
 
 
@@ -212,6 +212,7 @@ class AppuntoFormController < UITableViewController
         cellID = "addRigaCell"
         cell = tableView.dequeueReusableCellWithIdentifier(cellID) 
         cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:cellID)
+        cell.textLabel.color = self.tableView.tintColor
       
       elsif indexPath.row == @appunto.righe.count + 1
 
@@ -232,16 +233,24 @@ class AppuntoFormController < UITableViewController
     
     elsif indexPath.section == 2
 
+      cellID = "scanBarcodeCell"
+      cell = tableView.dequeueReusableCellWithIdentifier(cellID) 
+      cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:cellID)
+      cell.textLabel.color = self.tableView.tintColor
+
+    elsif indexPath.section == 3
+
       cellID = "addReminderCell"
       cell = tableView.dequeueReusableCellWithIdentifier(cellID) 
-      cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleCustom, reuseIdentifier:cellID)
-    
-    elsif indexPath.section == 3
+      cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:cellID)
+      cell.textLabel.color = self.tableView.tintColor
+
+    elsif indexPath.section == 4
 
       cellID = "deleteCell"
       cell = tableView.dequeueReusableCellWithIdentifier(cellID) 
-      cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleCustom, reuseIdentifier:cellID)
-    
+      cell ||= UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:cellID)
+
     end   
     cell
   end
@@ -259,7 +268,7 @@ class AppuntoFormController < UITableViewController
 
 
   def tableView(tableView, canEditRowAtIndexPath:indexPath)
-    if indexPath.section == 1 && indexPath.row > 0
+    if indexPath.section == 1 && indexPath.row > 0 && indexPath.row <= @appunto.righe.count 
       true
     else
       false
@@ -271,11 +280,11 @@ class AppuntoFormController < UITableViewController
     if indexPath.section == 1 && indexPath.row > 0
       riga = @appunto.righe.objectAtIndex(indexPath.row - 1)
       # devo per forza eliminare no _deleted
-      Store.shared.context.deleteObject(riga)
-      #riga.remove
-      tableView.updates do
-        tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation:UITableViewRowAnimationFade)
-      end
+      #Store.shared.context.deleteObject(riga)
+      riga.remove
+      
+      tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation:UITableViewRowAnimationFade)
+      
     end
   end
 
@@ -283,7 +292,7 @@ class AppuntoFormController < UITableViewController
   def tableView(tableView, didSelectRowAtIndexPath:indexPath)
     tableView.deselectRowAtIndexPath(indexPath, animated:true)
     
-    if indexPath.section == 3
+    if indexPath.section == 4
       cell = tableView.cellForRowAtIndexPath(indexPath)
       @actionSheet = UIActionSheet.alloc.initWithTitle("Sei sicuro?",
                                               delegate:self,
@@ -293,6 +302,12 @@ class AppuntoFormController < UITableViewController
 
       @actionSheet.showFromRect(cell.frame, inView:self.view, animated:true)
       #appunto.remove
+    
+    elsif indexPath.section == 2
+      cell = tableView.cellForRowAtIndexPath(indexPath)
+
+      scanVC = ScanController.alloc.initWithAppunto(@appunto)
+      self.presentModalViewController scanVC, animated:true
     end
   end
 
@@ -309,15 +324,6 @@ class AppuntoFormController < UITableViewController
 
       if presentedAsModal?
         self.dismissViewControllerAnimated(true, completion:nil)
-      end
-
-      if presentedInPopover?
-        "allow_dismiss_popover".post_notification
-        self.navigationController.popViewControllerAnimated(true)
-      end
-
-      if presentedInDetailView?
-        "pushClienteController".post_notification(self, cliente: cliente)
       end
 
       #self.delegate playerDetailsViewController:self didDeletePlayer:self.playerToEdit

@@ -13,7 +13,7 @@ class MappingProvider
     add_response_mapping(libro_mapping, "libro")
     add_response_mapping(libro_mapping, "libri")
     add_request_mapping(request_libro_mapping.inverseMapping, "libro", Libro)
-    add_route_set(Libro,   "api/v1/libri",   "api/v1/libri/:LibroId")
+    add_route_set(Libro,   "api/v1/libri",   "api/v1/libri/:remote_id")
 
     add_response_mapping(cliente_mapping, "cliente")
     add_response_mapping(cliente_mapping, "clienti")
@@ -90,11 +90,13 @@ class MappingProvider
     @libro_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Libro",
                                        inManagedObjectStore:@store)
-      mapping.identificationAttributes = [ "LibroId" ]
-      mapping.addAttributeMappingsFromDictionary(id: "LibroId",
+      mapping.identificationAttributes = [ "remote_id" ]
+      mapping.addAttributeMappingsFromDictionary(id: "remote_id",
                                                  titolo: "titolo",
                                                  settore: "settore",
                                                  sigla: "sigla",
+                                                 ean: "ean",
+                                                 cm: "cm",
                                                  prezzo_copertina: "prezzo_copertina",
                                                  prezzo_consigliato: "prezzo_consigliato",
                                                  image_url: "image_url"
@@ -108,9 +110,12 @@ class MappingProvider
                                        inManagedObjectStore:@store)
       mapping.addAttributeMappingsFromDictionary(titolo: "titolo",
                                                  sigla: "sigla",
+                                                 ean: "ean",
+                                                 cm: "cm",
                                                  prezzo_copertina: "prezzo_copertina", 
                                                  prezzo_consigliato: "prezzo_consigliato",
-                                                 settore: "settore" 
+                                                 settore: "settore",
+                                                 remote_image_url: "image_url" 
                                                  )
     end
   end

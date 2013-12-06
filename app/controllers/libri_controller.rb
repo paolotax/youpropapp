@@ -12,8 +12,6 @@ class LibriController < UIViewController
     @refreshControl.addTarget(self, action:"loadFromBackend", forControlEvents:UIControlEventValueChanged)
     self.tableView.addSubview(@refreshControl)
 
-    sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration
-    @session = NSURLSession.sessionWithConfiguration(sessionConfig)
     #self.tableView.registerClass(LibroCell, forCellReuseIdentifier:"cellLibro")
   end
 
@@ -31,6 +29,7 @@ class LibriController < UIViewController
   end
 
   def reload
+    Libro.reset
     @controller = nil
     self.tableView.reloadData
   end
@@ -52,27 +51,7 @@ class LibriController < UIViewController
 
     libro = @controller.objectAtIndexPath(indexPath)
 
-    riga = Riga.add do |r|
-      r.riga_uuid = BubbleWrap.create_uuid.downcase
-        
-      r.appunto = appunto
-      r.remote_appunto_id = appunto.remote_id 
-      r.libro = libro  
-      r.libro_id = libro.LibroId
-      r.titolo   = libro.titolo
-      r.prezzo_copertina    = libro.prezzo_copertina
-      r.prezzo_consigliato  = libro.prezzo_consigliato
-
-      if r.appunto.cliente.cliente_tipo == "Cartolibreria"
-        r.prezzo_unitario  = libro.prezzo_copertina
-        r.sconto   = 20
-      else
-        r.prezzo_unitario  = libro.prezzo_consigliato
-        r.sconto   = 0
-      end 
-
-      r.quantita = 1
-    end
+    riga = Riga.addToAppunto(appunto, withLibro:libro)
     
     segue.destinationViewController.riga  = riga  
     segue.destinationViewController.appunto = appunto
@@ -98,13 +77,19 @@ class LibriController < UIViewController
     true
   end
 
+
+# pragma mark - UITableView Delegate
+
+
   def numberOfSectionsInTableView(tableView)
     self.fetchControllerForTableView(tableView).sections.size
   end
+
   
   def tableView(tableView, numberOfRowsInSection:section)
     self.fetchControllerForTableView(tableView).sections[section].numberOfObjects
   end
+
 
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
     
@@ -121,7 +106,7 @@ class LibriController < UIViewController
     cell.imageCopertina.image = nil
     imageURL = NSURL.URLWithString libro.image_url
     if (imageURL) 
-      cell.imageDownloadTask = @session.dataTaskWithURL(imageURL,
+      cell.imageDownloadTask = App.delegate.url_session.dataTaskWithURL(imageURL,
         completionHandler: 
           lambda do |data, response, error|
             if error
@@ -147,23 +132,32 @@ class LibriController < UIViewController
     cell
   end
 
+
+  def tableView(tableView, accessoryButtonTappedForRowWithIndexPath:indexPath) 
+    tableView.deselectRowAtIndexPath(indexPath, animated:true)
+    libro = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
+
+    lvc = LibroFormController.alloc.initWithStyle(UITableViewStyleGrouped)
+    lvc.load_data libro
+    lvc.isNew = false
+    self.navigationController.pushViewController lvc, animated:true
+  end
+
+
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
     80
   end
 
+
   private
 
+
     def loadFromBackend
-      Store.shared.login do
-        Store.shared.backend.getObjectsAtPath("api/v1/libri",
-                                    parameters: nil,
-                                    success: lambda do |operation, result|
-                                                      @refreshControl.endRefreshing unless @refreshControl.nil?
-                                                      self.tableView.reloadData
-                                                    end,
-                                    failure: lambda do |operation, error|
-                                                      App.alert("#{error.localizedDescription}")
-                                                    end)
+      DataImporter.default.importa_libri(nil) do |result|
+        @refreshControl.endRefreshing unless @refreshControl.nil?
+        if result.success?
+          reload
+        end          
       end
     end
 

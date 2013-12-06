@@ -322,7 +322,7 @@ class ClientiController < UITableViewController
         
         if mode == KClientiMode
 
-          DataImporter.default.importa_clienti do |result|
+          DataImporter.default.importa_clienti(nil) do |result|
             @refreshControl.endRefreshing unless @refreshControl.nil?
             if result.success?
               reload

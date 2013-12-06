@@ -6,10 +6,10 @@ class Store
   BASE_URL = "http://youpropa.com"
   #BASE_URL = "http://localhost:3000"
 
-  #USERNAME = 'polso'
-  #PASSWORD = 'polso14'
-  USERNAME = 'paolotax'
-  PASSWORD = 'sisboccia'
+  # USERNAME = 'polso'
+  # PASSWORD = 'polso14'
+  # USERNAME = 'paolotax'
+  # PASSWORD = 'sisboccia'
   
   #server 
   APP_ID = "36e1b9ed802dc7ee45e375bf318924dc3ae0f0f842c690611fde8336687960eb"
@@ -19,7 +19,7 @@ class Store
   #APP_ID = "9aa427dcda89ebd5b3c9015dcd507242b70bac2a4d6e736589f6be35849474ff"
   #SECRET = "a5d78f0c32ba25fcbc1a679e03b110724497684263c1f4d9f645444cbf80a832"
 
-  attr_accessor :token
+  attr_accessor :token, :username, :password
 
   # login
 
@@ -28,8 +28,8 @@ class Store
       grant_type: 'password',
       client_id: APP_ID,
       client_secret: SECRET,
-      username: USERNAME,
-      password: PASSWORD
+      username: @username,
+      password: @password
     }
     AFNetworkActivityIndicatorManager.sharedManager.enabled = true
     AFMotion::Client.build_shared(BASE_URL) do

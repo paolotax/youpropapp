@@ -315,7 +315,148 @@
 @implementation NSString
 @end
 
+@implementation Base
+@end
+
+@implementation FormController
+@end
+
+@implementation FormableController
+@end
+
+@implementation InvalidClassError
+@end
+
+@implementation InvalidSectionError
+@end
+
+@implementation NoRowTypeError
+@end
+
+@implementation Conditions
+@end
+
+@implementation Form
+@end
+
+@implementation Form
+@end
+
+@implementation Object
+@end
+
+@implementation NSData
+@end
+
+@implementation UIActionSheet
+@end
+
+@implementation UITextField
+@end
+
+@implementation UITextField_Delegate
+@end
+
+@implementation UITextView
+@end
+
+@implementation UITextView_Delegate
+@end
+
+@implementation UITextView
+@end
+
+@implementation Row
+@end
+
+@implementation BackRow
+@end
+
+@implementation Base
+@end
+
+@implementation ButtonRow
+@end
+
+@implementation CheckRow
+@end
+
+@implementation CurrencyRow
+@end
+
+@implementation DateRow
+@end
+
+@implementation EditRow
+@end
+
+@implementation EmailRow
+@end
+
+@implementation ImageRow
+@end
+
+@implementation MapRowData
+@end
+
+@implementation MapRow
+@end
+
+@implementation NumberRow
+@end
+
+@implementation ObjectRow
+@end
+
+@implementation OptionsRow
+@end
+
+@implementation PagedImageRow
+@end
+
+@implementation PhoneRow
+@end
+
+@implementation PickerRow
+@end
+
+@implementation SliderRow
+@end
+
+@implementation StaticRow
+@end
+
+@implementation StringRow
+@end
+
+@implementation SubformRow
+@end
+
+@implementation SubmitRow
+@end
+
+@implementation SwitchRow
+@end
+
+@implementation TagsRow
+@end
+
+@implementation TemplateRow
+@end
+
+@implementation TextRow
+@end
+
+@implementation WebViewRow
+@end
+
+@implementation Section
+@end
+
 @implementation AppDelegate
+@end
+
+@implementation ALViewController
 @end
 
 @implementation AppuntiController
@@ -342,6 +483,9 @@
 @implementation DynamicNewController
 @end
 
+@implementation EditListController
+@end
+
 @implementation EditPrezzoViewController
 @end
 
@@ -351,10 +495,22 @@
 @implementation EditStatoViewController
 @end
 
+@implementation EditTextFieldController
+@end
+
 @implementation EditTextViewController
 @end
 
 @implementation LibriController
+@end
+
+@implementation LibroAddController
+@end
+
+@implementation LibroFormController
+@end
+
+@implementation LoginController
 @end
 
 @implementation MainController
@@ -366,10 +522,13 @@
 @implementation RigaFormController
 @end
 
+@implementation ScanController
+@end
+
 @implementation SearchClienteController
 @end
 
-@implementation ImporterResult
+@implementation DataImporterResult
 @end
 
 @implementation DataImporter

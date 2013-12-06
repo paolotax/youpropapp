@@ -56,13 +56,11 @@ class NSManagedObject
     if self.remote_id != 0  
       Store.shared.backend.deleteObject(self, path:nil, parameters:nil, 
                           success:lambda do |operation, responseObject|
-                                    result = ImporterResult.new(operation, responseObject, nil)
-
-                                    puts result
+                                    result = DataImporterResult.new(operation, responseObject, nil)
                                     callback.call(result)
                                   end, 
                           failure:lambda do |operation, error|
-                                    result = ImporterResult.new(operation, nil, error)
+                                    result = DataImporterResult.new(operation, nil, error)
                                     callback.call(result)
                                     App.alert("#{error.localizedDescription}")
                                   end)
@@ -75,13 +73,13 @@ class NSManagedObject
         Store.shared.backend.postObject(self, path:nil, parameters:nil, 
                             success:lambda do |operation, responseObject|
 
-                                      result = ImporterResult.new(operation, responseObject, nil)
+                                      result = DataImporterResult.new(operation, responseObject, nil)
                                       callback.call(result)
 
                                     end, 
                             failure:lambda do |operation, error|
                                       
-                                      result = ImporterResult.new(operation, nil, error)
+                                      result = DataImporterResult.new(operation, nil, error)
                                       callback.call(result)
                                       
                                       App.alert("#{error.localizedDescription}")
@@ -90,12 +88,12 @@ class NSManagedObject
         Store.shared.backend.putObject(self, path:nil, parameters:nil, 
                             success:lambda do |operation, responseObject|
 
-                                      result = ImporterResult.new(operation, responseObject, nil)
+                                      result = DataImporterResult.new(operation, responseObject, nil)
                                       callback.call(result)
 
                                     end, 
                             failure:lambda do |operation, error|
-                                      result = ImporterResult.new(operation, nil, error)
+                                      result = DataImporterResult.new(operation, nil, error)
 
                                       callback.call(result)
                                       App.alert("#{error.localizedDescription}")

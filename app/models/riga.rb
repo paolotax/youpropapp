@@ -27,6 +27,35 @@ class Riga < NSManagedObject
   ]
 
 
+
+
+
+  def self.addToAppunto(appunto, withLibro:libro)
+    riga = Riga.add do |r|
+      
+      r.riga_uuid = BubbleWrap.create_uuid.downcase
+      r.appunto = appunto
+      r.remote_appunto_id = appunto.remote_id 
+      r.libro = libro  
+      r.libro_id = libro.remote_id
+      r.titolo   = libro.titolo
+      r.prezzo_copertina    = libro.prezzo_copertina
+      r.prezzo_consigliato  = libro.prezzo_consigliato
+
+      if r.appunto.cliente.cliente_tipo == "Cartolibreria"
+        r.prezzo_unitario  = libro.prezzo_copertina
+        r.sconto   = 20
+      else
+        r.prezzo_unitario  = libro.prezzo_consigliato
+        r.sconto   = 0
+      end 
+
+      r.quantita = 1
+      #r.importo = 
+    end
+    riga
+  end
+
   def self.nel_baule
     context = Store.shared.context
     request = NSFetchRequest.alloc.init

@@ -14,6 +14,9 @@ class AppDelegate
     AFNetworkActivityIndicatorManager.sharedManager.enabled = true
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
 
+
+
+    
     if Device.ipad?
       storyboard = UIStoryboard.storyboardWithName("Main", bundle:nil)
       @window.rootViewController = storyboard.instantiateInitialViewController
@@ -21,8 +24,13 @@ class AppDelegate
       storyboard = UIStoryboard.storyboardWithName("MainPhone", bundle:nil)
       @window.rootViewController = storyboard.instantiateInitialViewController
     end
-
     @window.makeKeyAndVisible
+
+    @login = LoginController.alloc.init
+    @login_navigation = UINavigationController.alloc.initWithRootViewController(@login)
+
+    @window.rootViewController.presentModalViewController(@login_navigation, animated:false)
+    
     true
   end
 

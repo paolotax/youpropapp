@@ -63,8 +63,8 @@ class RigaFormController < UITableViewController
     editController = segue.destinationViewController
     editController.riga  = @riga
     editController.setPrezzoChangedBlock( lambda do |prezzo, sconto, error|
-        @riga.prezzo_unitario = prezzo.to_f.round(2)
-        @riga.sconto = sconto.to_f.round(2)
+        @riga.prezzo_unitario = prezzo.gsub(/,/, '.').to_f.round(2)
+        @riga.sconto = sconto.gsub(/,/, '.').to_f.round(2)
         return true
       end
     )

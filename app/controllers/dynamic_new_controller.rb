@@ -25,8 +25,6 @@ class DynamicNewController < UIViewController
 
     self.searchDisplayController.searchResultsTableView.tintColor = "#FF2D55".uicolor
     
-
-  
     # 1. add the lower background layer
     backgroundImageView = UIImageView.alloc.initWithImage(UIImage.imageNamed("Background-LowerLayer.png"))
     backgroundImageView.frame = CGRectInset(self.view.frame, -50.0, -50.0)

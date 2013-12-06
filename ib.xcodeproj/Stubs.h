@@ -786,9 +786,398 @@
 
 @end
 
+@interface Base
+-(IBAction) initialize:(id) params;
+-(IBAction) to_hash;
+-(IBAction) hash;
+-(IBAction) isEqual:(id) other;
+-(IBAction) encodeWithCoder:(id) encoder;
+-(IBAction) initWithCoder:(id) decoder;
+-(IBAction) copyWithZone:(id) zone;
+
+@end
+
+@interface FormController: UITableViewController
+-(IBAction) initWithForm:(id) form;
+-(IBAction) form;
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) push_subform:(id) form;
+-(IBAction) pop_subform;
+
+@end
+
+@interface FormableController: Formotion
+-(IBAction) initWithModel:(id) model;
+
+@end
+
+@interface InvalidClassError: StandardError
+@end
+
+@interface InvalidSectionError: StandardError
+@end
+
+@interface NoRowTypeError: StandardError
+-(IBAction) assert_nil_or_boolean:(id) obj;
+
+@end
+
+@interface Conditions
+-(IBAction) assert_nil_or_boolean:(id) obj;
+
+@end
+
+@interface Form: Formotion
+-(IBAction) initialize:(id) params;
+-(IBAction) initialize_persist;
+-(IBAction) create_section:(id) hash;
+-(IBAction) sections;
+-(IBAction) row_for_index_path:(id) index_path;
+-(IBAction) row:(id) key;
+-(IBAction) submit;
+-(IBAction) to_hash;
+-(IBAction) render;
+-(IBAction) sub_render;
+-(IBAction) values;
+-(IBAction) init_observer_for_save;
+-(IBAction) open;
+-(IBAction) save;
+-(IBAction) reset;
+-(IBAction) persist_key;
+-(IBAction) original_persist_key;
+-(IBAction) load_state;
+-(IBAction) recursive_delete_nil:(id) h;
+
+@end
+
+@interface Form: Formotion
+-(IBAction) active_row;
+-(IBAction) controller;
+-(IBAction) table;
+-(IBAction) reload_data;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
+
+@end
+
+@interface Object
+-(IBAction) to_archived_data;
+
+@end
+
+@interface NSData
+-(IBAction) unarchive;
+
+@end
+
+@interface UIActionSheet
+-(IBAction) addButtonWithTitle:(id) title;
+
+@end
+
+@interface UITextField
+-(IBAction) add_delegate_method;
+
+@end
+
+@interface UITextField_Delegate
+-(IBAction) textFieldShouldBeginEditing:(id) theTextField;
+-(IBAction) textFieldDidBeginEditing:(id) theTextField;
+-(IBAction) textFieldShouldEndEditing:(id) theTextField;
+-(IBAction) textFieldDidEndEditing:(id) theTextField;
+-(IBAction) on_change:(id) theTextField;
+-(IBAction) textFieldShouldClear:(id) theTextField;
+-(IBAction) textFieldShouldReturn:(id) theTextField;
+
+@end
+
+@interface UITextView
+-(IBAction) add_delegate_method;
+-(IBAction) textViewShouldBeginEditing:(id) theTextView;
+
+@end
+
+@interface UITextView_Delegate
+-(IBAction) textViewShouldBeginEditing:(id) theTextView;
+-(IBAction) textViewDidBeginEditing:(id) theTextView;
+-(IBAction) textViewShouldEndEditing:(id) theTextView;
+-(IBAction) textViewDidEndEditing:(id) theTextView;
+-(IBAction) textViewDidChange:(id) theTextView;
+
+@end
+
+@interface UITextView
+-(IBAction) initWithCoder:(id) decoder;
+-(IBAction) initWithFrame:(id) frame;
+-(IBAction) setup;
+-(IBAction) dealloc;
+-(IBAction) drawRect:(id) rect;
+-(IBAction) setText:(id) text;
+-(IBAction) placeholder;
+-(IBAction) placeholder_rect;
+-(IBAction) placeholder_color;
+-(IBAction) updateShouldDrawPlaceholder;
+
+@end
+
+@interface Row: Formotion
+-(IBAction) initialize:(id) params;
+-(IBAction) after_create;
+-(IBAction) value_for_save_hash;
+-(IBAction) index_path;
+-(IBAction) form;
+-(IBAction) reuse_identifier;
+-(IBAction) next_row;
+-(IBAction) previous_row;
+-(IBAction) items;
+-(IBAction) type;
+-(IBAction) range;
+-(IBAction) return_key;
+-(IBAction) auto_correction;
+-(IBAction) auto_capitalization;
+-(IBAction) clear_button;
+-(IBAction) text_alignment;
+-(IBAction) selection_style;
+-(IBAction) editable;
+-(IBAction) make_cell;
+-(IBAction) update_cell:(id) cell;
+-(IBAction) to_hash;
+-(IBAction) subform;
+-(IBAction) to_form;
+-(IBAction) load_constants_hack;
+
+@end
+
+@interface BackRow: ButtonRow
+@end
+
+@interface Base
+-(IBAction) tableView;
+-(IBAction) initialize:(id) row;
+-(IBAction) cell_style;
+-(IBAction) cellEditingStyle;
+-(IBAction) build_cell:(id) cell;
+-(IBAction) after_build:(id) cell;
+-(IBAction) update_cell:(id) cell;
+-(IBAction) delete_row;
+-(IBAction) after_delete;
+
+@end
+
+@interface ButtonRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+
+@end
+
+@interface CheckRow: Base
+-(IBAction) update_cell_value:(id) cell;
+-(IBAction) build_cell:(id) cell;
+
+@end
+
+@interface CurrencyRow: NumberRow
+-(IBAction) on_change:(id) text_field;
+-(IBAction) row_value;
+-(IBAction) value_for_save_hash;
+-(IBAction) number_formatter;
+-(IBAction) currency_scale;
+
+@end
+
+@interface DateRow: StringRow
+-(IBAction) on_change:(id) text_field;
+-(IBAction) update;
+-(IBAction) date_value;
+-(IBAction) formatter;
+-(IBAction) after_build:(id) cell;
+-(IBAction) picker;
+-(IBAction) picker_mode;
+-(IBAction) formatted_value;
+-(IBAction) update_text_field:(id) new_value;
+
+@end
+
+@interface EditRow: ButtonRow
+@end
+
+@interface EmailRow: StringRow
+-(IBAction) keyboardType;
+
+@end
+
+@interface ImageRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) add_plus_accessory:(id) cell;
+
+@end
+
+@interface MapRowData
+-(IBAction) title;
+-(IBAction) subtitle;
+-(IBAction) coordinate;
+
+@end
+
+@interface MapRow: Base
+-(IBAction) set_pin;
+-(IBAction) annotations;
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+
+@end
+
+@interface NumberRow: StringRow
+-(IBAction) keyboardType;
+
+@end
+
+@interface ObjectRow: StringRow
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) update_text_field:(id) new_value;
+-(IBAction) row_value;
+
+@end
+
+@interface OptionsRow: Base
+-(IBAction) build_cell:(id) cell;
+
+@end
+
+@interface PagedImageRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) add_plus_accessory:(id) cell;
+-(IBAction) loadVisiblePages;
+-(IBAction) get_active_page;
+-(IBAction) pages_single_tap;
+-(IBAction) clearPages;
+-(IBAction) resizePages;
+
+@end
+
+@interface PhoneRow: StringRow
+-(IBAction) keyboardType;
+
+@end
+
+@interface PickerRow: StringRow
+-(IBAction) after_build:(id) cell;
+-(IBAction) picker;
+-(IBAction) numberOfComponentsInPickerView:(id) pickerView;
+-(IBAction) on_change:(id) text_field;
+-(IBAction) update_text_field:(id) new_value;
+-(IBAction) select_picker_value:(id) new_value;
+-(IBAction) row_value;
+
+@end
+
+@interface SliderRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+
+@end
+
+@interface StaticRow: StringRow
+-(IBAction) after_build:(id) cell;
+
+@end
+
+@interface StringRow: Base
+-(IBAction) keyboardType;
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) setText:(id) text;
+-(IBAction) row_value;
+-(IBAction) add_callbacks:(id) field;
+-(IBAction) on_change:(id) text_field;
+-(IBAction) update_text_field:(id) new_value;
+-(IBAction) input_accessory_view:(id) input_accessory;
+-(IBAction) done_editing;
+
+@end
+
+@interface SubformRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) update_cell:(id) cell;
+-(IBAction) display_key_label;
+
+@end
+
+@interface SubmitRow: ButtonRow
+@end
+
+@interface SwitchRow: Base
+-(IBAction) build_cell:(id) cell;
+
+@end
+
+@interface TagsRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) add_plus_accessory:(id) cell;
+-(IBAction) image_for_state:(id) state;
+-(IBAction) attrib_for_state:(id) state;
+-(IBAction) add_tag:(id) text;
+-(IBAction) button_click:(id) btn;
+
+@end
+
+@interface TemplateRow: Base
+-(IBAction) cellEditingStyle;
+-(IBAction) build_cell:(id) cell;
+-(IBAction) build_new_row:(id) options;
+-(IBAction) after_delete;
+-(IBAction) move_row_in_list:(id) new_row;
+-(IBAction) update_template_rows;
+
+@end
+
+@interface TextRow: Base
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) dismissKeyboard;
+
+@end
+
+@interface WebViewRow: Base
+-(IBAction) set_page;
+-(IBAction) stringByEvaluatingJavaScriptFromString:(id) script;
+-(IBAction) loading;
+-(IBAction) build_cell:(id) cell;
+-(IBAction) layoutSubviews;
+-(IBAction) webViewDidFinishLoad:(id) web_view;
+
+@end
+
+@interface Section: Formotion
+-(IBAction) initialize:(id) params;
+-(IBAction) generate_row:(id) hash;
+-(IBAction) create_row:(id) hash;
+-(IBAction) rows;
+-(IBAction) index;
+-(IBAction) next_section;
+-(IBAction) previous_section;
+-(IBAction) refresh_row_indexes;
+-(IBAction) to_hash;
+
+@end
+
 @interface AppDelegate
 -(IBAction) window;
 -(IBAction) initAppearance;
+
+@end
+
+@interface ALViewController: UIViewController
+-(IBAction) viewDidLoad;
+-(IBAction) layout_subviews;
+-(IBAction) layout_subviews2;
+-(IBAction) supportedInterfaceOrientations;
+-(IBAction) preferredInterfaceOrientationForPresentation;
 
 @end
 
@@ -912,6 +1301,13 @@
 
 @end
 
+@interface EditListController: UITableViewController
+-(IBAction) initWithItems:(id) items;
+-(IBAction) viewDidLoad;
+-(IBAction) cancel:(id) sender;
+
+@end
+
 @interface EditPrezzoViewController: UITableViewController
 
 @property IBOutlet id editPrezzo;
@@ -955,6 +1351,20 @@
 
 @end
 
+@interface EditTextFieldController: UIViewController
+-(IBAction) initWithType:(id) fieldType;
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) text_label;
+-(IBAction) text_field;
+-(IBAction) handleTextCompletion;
+-(IBAction) done:(id) sender;
+-(IBAction) cancel:(id) sender;
+-(IBAction) textFieldShouldReturn:(id) textField;
+-(IBAction) textFieldDidBeginEditing:(id) textField;
+
+@end
+
 @interface EditTextViewController: UIViewController
 
 @property IBOutlet id textView;
@@ -982,6 +1392,41 @@
 -(IBAction) fetchControllerForTableView:(id) tableView;
 -(IBAction) numberOfSectionsInTableView:(id) tableView;
 -(IBAction) loadFromBackend;
+
+@end
+
+@interface LibroAddController: UIViewController
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) loadData;
+-(IBAction) labelAuthors;
+-(IBAction) labelTitle;
+-(IBAction) labelPublisher;
+-(IBAction) labelISBN;
+-(IBAction) imageCover;
+-(IBAction) buttonCreate;
+-(IBAction) buttonEdit;
+-(IBAction) buttonDismiss;
+-(IBAction) bookCreate:(id) sender;
+-(IBAction) bookEdit:(id) sender;
+-(IBAction) dismiss;
+
+@end
+
+@interface LibroFormController: UITableViewController
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) load_data:(id) libro;
+-(IBAction) save:(id) sender;
+-(IBAction) cancel:(id) sender;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
+
+@end
+
+@interface LoginController: Formotion
+-(IBAction) init;
+-(IBAction) viewDidLoad;
+-(IBAction) login;
 
 @end
 
@@ -1023,6 +1468,28 @@
 
 @end
 
+@interface ScanController: UIViewController
+-(IBAction) initWithAppunto:(id) appunto;
+-(IBAction) viewDidLoad;
+-(IBAction) viewWillAppear:(id) animated;
+-(IBAction) viewWillDisappear:(id) animated;
+-(IBAction) applicationWillEnterForeground:(id) notification;
+-(IBAction) applicationDidEnterBackground:(id) notification;
+-(IBAction) displayBook:(id) notification;
+-(IBAction) torchButtonAction:(id) sender;
+-(IBAction) startRunning;
+-(IBAction) stopRunning;
+-(IBAction) setupCaptureSession;
+-(IBAction) processMetadataObject:(id) code;
+-(IBAction) previewView;
+-(IBAction) rectOfInterestView;
+-(IBAction) tableView;
+-(IBAction) buttonDismiss;
+-(IBAction) dismiss;
+-(IBAction) numberOfSectionsInTableView:(id) tableView;
+
+@end
+
 @interface SearchClienteController: UIViewController
 
 @property IBOutlet id fakeTableView;
@@ -1037,7 +1504,7 @@
 
 @end
 
-@interface ImporterResult
+@interface DataImporterResult
 -(IBAction) body;
 
 @end
@@ -1285,9 +1752,6 @@
 @property IBOutlet id imageCopertina;
 @property IBOutlet id labelTitolo;
 @property IBOutlet id labelPrezzoCopertina;
-@property IBOutlet id buttonAdd;
-
--(IBAction) pushAddButton:(id) sender;
 
 @end
 

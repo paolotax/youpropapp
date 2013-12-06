@@ -1,23 +1,28 @@
 class MenuController < UITableViewController
 
+  
   attr_accessor :mainVC
 
+  
   def viewDidLoad
     super
     @selectedIndexPaths = [nil, nil]
     self.tableView.allowsMultipleSelection = true
   end
 
+  
   def viewWillAppear(animated)
     super
     "bauleDidChange".add_observer(self, :ricalcola)
     ricalcola
   end
 
+  
   def viewWillDisappear(animated)
     super
     "bauleDidChange".remove_observer(self, :ricalcola)
   end
+
 
   def ricalcola
     self.tableView.indexPathsForVisibleRows.each do |indexPath|
@@ -35,6 +40,7 @@ class MenuController < UITableViewController
     end
   end
 
+  
   def tableView(tableView, willDisplayCell:cell, forRowAtIndexPath:indexPath)
     cell.backgroundColor = UIColor.clearColor
     bgColorView = UIView.alloc.init
@@ -43,6 +49,7 @@ class MenuController < UITableViewController
     cell.selectedBackgroundView = bgColorView  
   end
 
+  
   def tableView(tableView, didSelectRowAtIndexPath:indexPath)
     cell = tableView.cellForRowAtIndexPath indexPath
     
@@ -51,6 +58,7 @@ class MenuController < UITableViewController
   
   end
 
+  
   def tableView(tableView, willSelectRowAtIndexPath:indexPath)
     section = indexPath.section
     oldIndex = @selectedIndexPaths[section]
@@ -65,6 +73,7 @@ class MenuController < UITableViewController
 
   # data count methods
 
+  
   def nel_baule_count
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -83,6 +92,7 @@ class MenuController < UITableViewController
     data
   end
 
+  
   def in_sospeso_count
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -107,6 +117,7 @@ class MenuController < UITableViewController
     data
   end
 
+  
   def da_fare_count
     context = Store.shared.context
     request = NSFetchRequest.alloc.init
@@ -130,6 +141,7 @@ class MenuController < UITableViewController
     data
   end
 
+  
   def tutti_count
     context = Store.shared.context
     request = NSFetchRequest.alloc.init

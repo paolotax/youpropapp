@@ -39,10 +39,8 @@ class Appunto < NSManagedObject
 
 
   def self.load
-
-    super
-    puts "load"
     
+    super
     NSNotificationCenter.defaultCenter.addObserver(self.class,
                                               selector:"objectContextWillSave:",
                                                     name: NSManagedObjectContextWillSaveNotification,
@@ -170,8 +168,8 @@ class Appunto < NSManagedObject
   end
 
 
-
   # FILTRI
+
 
   def self.nel_baule
     
