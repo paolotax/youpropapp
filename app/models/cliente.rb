@@ -112,309 +112,46 @@ class Cliente < NSManagedObject
     mapItem
   end
 
-  def self.nel_baule
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
 
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule = 1"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
+  ["tutti", "nel_baule", "da_fare", "in_sospeso"].each do |scope|
 
-    request.sortDescriptors = ["provincia", "comune", "nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
+    # define_singleton_method("#{scope}") do
+  
+    #   context = Store.shared.context
+    #   request = NSFetchRequest.alloc.init
+    #   request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
+
+    #   request = ScopeInjector.setScopeWithName(scope, toFetchRequest:request)
+      
+    #   error_ptr = Pointer.new(:object)
+    #   data = context.executeFetchRequest(request, error:error_ptr)
+    #   if data == nil
+    #     raise "Error when fetching data: #{error_ptr[0].description}"
+    #   end
+    #   data
+    # end
+
+    define_singleton_method("#{scope}_controller") do |provincia|
+  
+      context = Store.shared.context
+      request = NSFetchRequest.alloc.init
+      request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
+
+      request = ScopeInjector.setScopeWithName(scope, toFetchRequest:request)
+      if provincia
+        request = ScopeInjector.addProvinciaScope(provincia, toFetchRequest:request)
+      end   
+      
+      error_ptr = Pointer.new(:object)
+      controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
+      unless controller.performFetch(error_ptr)
+        raise "Error when fetching data: #{error_ptr[0].description}"
+      end
+      
+      controller
     end
-    data
   end
 
-  def self.nel_baule_controller
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule = 1"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    request.sortDescriptors = ["provincia", "comune", "nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-        
-    error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:nil, cacheName:nil)      
-    unless controller.performFetch(error_ptr)
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    
-    controller
-  end
-
-  def sum_copie
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName("Cliente", inManagedObjectContext:context)
-    request.resultType = NSDictionaryResultType
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("ClienteId = '#{self.ClienteId}'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    keyPathExpression = NSExpression.expressionForKeyPath "appunti" 
-    countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(keyPathExpression))
-
-
-    expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("sum")
-    expressionDescription.setExpression(countExpression)
-    expressionDescription.setExpressionResultType(NSInteger32AttributeType)
-
-    request.setPropertiesToFetch NSArray.arrayWithObject(expressionDescription)
-
-    # request.sortDescriptors = ["provincia", "comune", "nome"].collect { |sortKey|
-    #   NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    # }
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-
-  end
-
-  def self.in_sospeso
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-    request.resultType = NSDictionaryResultType
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunti_da_fare = null"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunti_in_sospeso > 0"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    key = NSExpression.expressionForKeyPath "ClienteId" 
-    countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(key))
-
-    expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("in_sospeso")
-    expressionDescription.setExpression(countExpression)
-    expressionDescription.setExpressionResultType(NSInteger32AttributeType)
-
-    request.setPropertiesToFetch NSArray.arrayWithObject(expressionDescription)
-
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
-
-  def self.in_sospeso_controller
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunti_da_fare = null"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunti_in_sospeso > 0"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    request.sortDescriptors = ["provincia", "comune", "nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-
-    error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
-    unless controller.performFetch(error_ptr)
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    
-    controller
-  end
-
-  def self.da_fare
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-    request.resultType = NSDictionaryResultType
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunti_da_fare > 0"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    key = NSExpression.expressionForKeyPath "ClienteId" 
-    countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(key))
-
-
-    expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("da_fare")
-    expressionDescription.setExpression(countExpression)
-    expressionDescription.setExpressionResultType(NSInteger32AttributeType)
-
-    request.setPropertiesToFetch NSArray.arrayWithObject(expressionDescription)
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
-
-  def self.da_fare_controller
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunti_da_fare > 0"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    request.sortDescriptors = ["provincia", "comune", "nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-
-    error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
-    unless controller.performFetch(error_ptr)
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    
-    controller
-  end
-
-  def self.scuole_fatte
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-    request.resultType = NSDictionaryResultType
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("fatto = 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente_tipo = 'Scuola Primaria'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    key = NSExpression.expressionForKeyPath "ClienteId" 
-    countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(key))
-
-
-    expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("scuole_fatte")
-    expressionDescription.setExpression(countExpression)
-    expressionDescription.setExpressionResultType(NSInteger32AttributeType)
-
-    request.setPropertiesToFetch NSArray.arrayWithObject(expressionDescription)
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
-
-
-  def self.scuole_da_fare
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-    request.resultType = NSDictionaryResultType
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("fatto = 0"))
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente_tipo = 'Scuola Primaria'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    key = NSExpression.expressionForKeyPath "ClienteId" 
-    countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(key))
-
-
-    expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("scuole_da_fare")
-    expressionDescription.setExpression(countExpression)
-    expressionDescription.setExpressionResultType(NSInteger32AttributeType)
-
-    request.setPropertiesToFetch NSArray.arrayWithObject(expressionDescription)
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
-
-  def self.clienti_nel_baule
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-    request.resultType = NSDictionaryResultType
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("nel_baule = 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente_tipo = 'Scuola Primaria'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    key = NSExpression.expressionForKeyPath "ClienteId" 
-    countExpression = NSExpression.expressionForFunction("count:", arguments:NSArray.arrayWithObject(key))
-
-
-    expressionDescription = NSExpressionDescription.alloc.init
-    expressionDescription.setName("clienti_nel_baule")
-    expressionDescription.setExpression(countExpression)
-    expressionDescription.setExpressionResultType(NSInteger32AttributeType)
-
-    request.setPropertiesToFetch NSArray.arrayWithObject(expressionDescription)
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
 
   def nel_baule?
     nel_baule == 1

@@ -21,9 +21,44 @@ class Store
 
   attr_accessor :token, :username, :password
 
-  # login
+
+# login
+
+
+  # def login(&block)
+  #   data = {
+  #     grant_type: 'password',
+  #     client_id: APP_ID,
+  #     client_secret: SECRET,
+  #     username: @username,
+  #     password: @password
+  #   }
+  #   AFNetworkActivityIndicatorManager.sharedManager.enabled = true
+  #   AFMotion::Client.build_shared(BASE_URL) do
+  #     header "Accept", "application/json"
+
+  #     operation :json
+  #   end
+  #   AFMotion::Client.shared.post("oauth/token", data) do |result|
+  #     if result.success?
+
+  #       token = result.object['access_token']        
+  #       @token = token
+  #       self.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
+
+  #       block.call
+  #     else
+  #       "errorLogin".post_notification
+  #       App.alert("Attenzione.\n Non riesco connettermi al server. \nPuoi comunque aggiornare i dati offline, il server dovrà essere aggiornato a manoni")
+  #     end
+  #   end
+  # end
+
 
   def login(&block)
+    
+    SVProgressHUD.show
+    
     data = {
       grant_type: 'password',
       client_id: APP_ID,
@@ -31,27 +66,50 @@ class Store
       username: @username,
       password: @password
     }
-    AFNetworkActivityIndicatorManager.sharedManager.enabled = true
-    AFMotion::Client.build_shared(BASE_URL) do
-      header "Accept", "application/json"
+    
+    self.client.postPath("oauth/token",
+                               parameters:data,
+                                  success:lambda do |operation, responseObject|
+                                    token = responseObject.objectForKey "access_token"
+                                    CredentialStore.default.token = token
+                                    SVProgressHUD.dismiss
+                                    set_token_header
+                                    block.call
+                                  end,
+                                       
+                                  failure:lambda do |operation, error|
 
-      operation :json
-    end
-    AFMotion::Client.shared.post("oauth/token", data) do |result|
-      if result.success?
+                                    if operation.response
+                                      if (operation.response.statusCode == 500)
+                                        SVProgressHUD.showErrorWithStatus("Ooops! Something went wrong!")
+                                      else
+                                        jsonData = operation.responseString.dataUsingEncoding NSUTF8StringEncoding
+                                        json = NSJSONSerialization.JSONObjectWithData jsonData, options:0, error:nil
+                                        errorMessage = json.objectForKey "error"
+                                        SVProgressHUD.showErrorWithStatus errorMessage
+                                      end
+                                    else
+                                      SVProgressHUD.showErrorWithStatus("No Connection")
+                                    end
 
-        token = result.object['access_token']        
-        @token = token
+                                  end)
+  
 
-        self.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
-
-        block.call
-      else
-        "errorLogin".post_notification
-        App.alert("Attenzione.\n Non riesco connettermi al server. \nPuoi comunque aggiornare i dati offline, il server dovrà essere aggiornato a manoni")
-      end
-    end
   end
+
+
+
+
+  def set_token_header
+    token = CredentialStore.default.token
+    self.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
+  end
+
+  
+  def token_changed(notification)
+    set_token_header
+  end
+
 
   def client
     self.backend.HTTPClient
@@ -63,19 +121,24 @@ class Store
     client.operationQueue.suspended = true
 
     @reachability = Reachability.reachabilityWithHostname(BASE_URL)
+    
     @reachability.reachableBlock = lambda do |reachable| 
-      client.operationQueue.suspended = false
+      #client.operationQueue.suspended = false
       puts "reachable"
     end    
+    
     @reachability.unreachableBlock = lambda do |reachable| 
-      client.operationQueue.suspended = true
+      #client.operationQueue.suspended = true
       puts "unreachable"
     end
+    
     @reachability.startNotifier
   end
 
 
-
+  def isReachable?
+    @reachability.isReachable == true
+  end
 
 
 

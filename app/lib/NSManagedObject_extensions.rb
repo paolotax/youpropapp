@@ -103,6 +103,56 @@ class NSManagedObject
   end
 
 
+  def save_to_backend(parameters, withNotification:notification, success:success, failure:
+    failure)
+
+    puts "succ.#{success}"
+    processSuccessBlock = lambda do
+      puts "processSuccessBlock"
+      success.call
+    end
+    
+    processFailureBlock = lambda do
+      puts "processFailureBlock"
+      failure.call
+    end
+
+    puts "evvai save"
+
+    token = CredentialStore.default.token
+    Store.shared.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
+
+    if remote_id == 0
+
+      Store.shared.backend.postObject(self, 
+                                       path:nil,
+                                 parameters:parameters,
+                                    success:lambda do |operation, responseObject|
+                                      result = DataImporterResult.new(operation, responseObject, nil)
+                                      NSLog "Postato #{self.remote_id}"
+                                      processSuccessBlock.call
+                                    end,                                   
+                                    failure:lambda do |operation, error|
+                                      puts "status=#{operation.HTTPRequestOperation.response.statusCode}"
+                                      if (operation.HTTPRequestOperation.response.statusCode == 401)
+                                        CredentialStore.default.token = nil
+                                        auth = UserAuthenticator.new
+                                        auth.refreshTokenAndRetryOperation(operation,
+                                             withNotification:notification,
+                                                      success:lambda do
+                                                        processSuccessBlock.call
+                                                      end,
+                                                      failure:lambda do
+                                                        processFailureBlock.call
+                                                      end)
+                                      else
+                                        processFailureBlock.call
+                                      end
+                                    end)
+    end
+  end
+
+
   def self.aggregateOperation(function, onAttribute:attributeName, withPredicate:predicate, inManagedObjectContext:context)
 
     ex = NSExpression.expressionForFunction(function,arguments:NSArray.arrayWithObject(NSExpression.expressionForKeyPath(attributeName)))

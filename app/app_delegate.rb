@@ -7,6 +7,7 @@ class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     
     self.initAppearance
+    Store.shared.setupReachability
 
     sessionConfig = NSURLSessionConfiguration.defaultSessionConfiguration
     @url_session = NSURLSession.sessionWithConfiguration(sessionConfig)
@@ -14,9 +15,7 @@ class AppDelegate
     AFNetworkActivityIndicatorManager.sharedManager.enabled = true
     @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
 
-
-
-    
+   
     if Device.ipad?
       storyboard = UIStoryboard.storyboardWithName("Main", bundle:nil)
       @window.rootViewController = storyboard.instantiateInitialViewController
@@ -37,6 +36,7 @@ class AppDelegate
   def window
     @window
   end
+
 
   def initAppearance
 

@@ -203,7 +203,6 @@
                                     <outlet property="clienteLabel" destination="oyH-4q-rPF" id="VIp-8K-uoC"/>
                                     <outlet property="colorButton" destination="c1Q-Ag-mPm" id="rWB-A7-Qwt"/>
                                     <segue destination="PqX-fA-Z34" kind="push" identifier="showCliente" id="21S-cM-NIe"/>
-                                    <segue destination="QQO-15-6yc" kind="modal" identifier="modalCliente" trigger="accessoryAction" id="0ak-wg-cFT"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="cellAppunto" rowHeight="78" id="09t-a1-56l" customClass="AppuntoCell">
@@ -258,66 +257,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Xuf-Ox-eQm" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="223" y="-2829"/>
-        </scene>
-        <!--Appunto Modal Controller-->
-        <scene sceneID="fNd-UU-27b">
-            <objects>
-                <viewController id="QQO-15-6yc" customClass="AppuntoModalController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Xua-6p-etU"/>
-                        <viewControllerLayoutGuide type="bottom" id="1C8-Aw-no5"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="x28-c3-qLp">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Si Sboccia" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v33-wI-Ekt">
-                                <rect key="frame" x="119" y="240" width="83" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" alpha="0.75" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PRp-ah-00L">
-                                <rect key="frame" x="116" y="269" width="88" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="Chiudi">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <state key="highlighted">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="close:" destination="QQO-15-6yc" eventType="touchUpInside" id="pgL-d3-atU"/>
-                                </connections>
-                            </button>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dbo-l9-JwV">
-                                <rect key="frame" x="0.0" y="524" width="320" height="44"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                <items>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="K7v-Rc-p7B"/>
-                                    <barButtonItem style="plain" id="SOT-Om-LIE">
-                                        <segmentedControl key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" id="9eV-nq-Kyk">
-                                            <rect key="frame" x="77" y="8" width="166" height="29"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                            <segments>
-                                                <segment title="Clienti"/>
-                                                <segment title="Appunti"/>
-                                            </segments>
-                                        </segmentedControl>
-                                    </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="cNn-K8-XSv"/>
-                                </items>
-                            </toolbar>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="zD9-C4-88I" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="819" y="-2162"/>
         </scene>
         <!--Cliente Detail Controller-->
         <scene sceneID="Pzx-5H-dk1">
@@ -460,7 +399,11 @@
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="wPL-Df-LgP"/>
-                        <barButtonItem title="web" id="V5g-oR-8bK"/>
+                        <barButtonItem title="web" id="V5g-oR-8bK">
+                            <connections>
+                                <action selector="goToSite:" destination="PqX-fA-Z34" id="bLY-uL-gnA"/>
+                            </connections>
+                        </barButtonItem>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="tBy-Pp-NJ3">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="lYQ-VA-vXM">
@@ -1730,7 +1673,7 @@
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="FJK-Zg-Zft"/>
+        <segue reference="y0U-6E-HAY"/>
         <segue reference="nm4-v7-Bkd"/>
         <segue reference="zOe-v0-obi"/>
     </inferredMetricsTieBreakers>

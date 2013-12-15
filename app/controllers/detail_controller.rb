@@ -61,7 +61,7 @@ class DetailController < UIViewController
     clientiVC.tableView.setTintColor color
     clientiVC.navigationController.navigationBar.setTintColor color
     clientiVC.navigationController.toolbar.setTintColor color
-        
+    clientiVC.loadProvince   
     clientiVC.reload
   
     self.labelSottotitolo.color = color
@@ -72,6 +72,7 @@ class DetailController < UIViewController
       self.clientiVC = segue.destinationViewController.topViewController
     end
   end
+
     
 
 end

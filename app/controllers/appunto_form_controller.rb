@@ -94,20 +94,20 @@ class AppuntoFormController < UITableViewController
     Store.shared.save
     Store.shared.persist
 
-    unless appunto.remote_id == 0
-      self.appunto.save_to_backend {}
+    if @appunto.remote_id == 0
+      @appunto.save_to_backend(nil, withNotification:"retrySave", success:nil, failure:nil)
     end
     
     if presentedAsModal?
-      
+
       self.dismissViewControllerAnimated(true, completion:nil)
       
-      DataImporter.default.sync_appunti
+      # DataImporter.default.sync_appunti
 
-      didChange = NSManagedObjectContextObjectsDidChangeNotification
-      didChange.remove_observer(self, "changes:")
-      didSave = NSManagedObjectContextDidSaveNotification
-      didSave.remove_observer(self, "didSave:")
+      # didChange = NSManagedObjectContextObjectsDidChangeNotification
+      # didChange.remove_observer(self, "changes:")
+      # didSave = NSManagedObjectContextDidSaveNotification
+      # didSave.remove_observer(self, "didSave:")
     end
     
   end

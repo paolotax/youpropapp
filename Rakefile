@@ -38,7 +38,8 @@ Motion::Project::App.setup do |app|
     pod 'RestKit'
     pod 'CustomBadge'
     pod 'HTAutocompleteTextField'
-    pod 'JGScrollableTableViewCell'
+    pod 'SVProgressHUD'
+    pod 'Reachability'
   end
 
 

@@ -50,7 +50,7 @@ class LibroAddController < UIViewController
 
   def loadData
 
-    @labelAuthors.text = book.authors.join(", ")
+    @labelAuthors.text = book.authors.join(", ") if book.authors
     @labelTitle.text = book.title
     @labelPublisher.text = book.publisher
     @labelISBN.text = book.isbn

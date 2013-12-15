@@ -21,26 +21,28 @@ class ClientiController < UITableViewController
     @refreshControl.addTarget(self, action:"loadFromBackend", forControlEvents:UIControlEventValueChanged)
     self.tableView.addSubview(@refreshControl)
 
-    @segmentedProvince = UISegmentedControl.alloc.initWithItems(["tutte","RA", "RE"])
-    @segmentedProvince.setSelectedSegmentIndex(0)
-    @segmentedProvince.addTarget(self, action:"changeProvincia:", forControlEvents:UIControlEventValueChanged)
-    @segmentedProvince.delegate = self
-    self.navigationItem.titleView = @segmentedProvince
-
     @segmentedControl = UISegmentedControl.alloc.initWithItems(["Clienti", "Appunti"])
     @segmentedControl.setSelectedSegmentIndex(0)
     @segmentedControl.addTarget(self, action:"changeMode:", forControlEvents:UIControlEventValueChanged)
     @segmentedControl.delegate = self
-    segItem = UIBarButtonItem.alloc.initWithCustomView(@segmentedControl)
- 
+    segItem = UIBarButtonItem.alloc.initWithCustomView(@segmentedControl) 
     sep =     UIBarButtonItem.alloc.initWithBarButtonSystemItem(UIBarButtonSystemItemFlexibleSpace, target:nil, action:nil)
-
-    self.toolbarItems = [ sep, segItem, sep]
+    self.toolbarItems = [sep, segItem, sep]
 
     self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoAuto")
-    self.tableView.registerClass(HeaderCliente, forHeaderFooterViewReuseIdentifier:"headerCliente")
-    #self.tableView.sectionHeaderHeight = 44
-    
+    self.tableView.registerClass(HeaderCliente, forHeaderFooterViewReuseIdentifier:"headerCliente")    
+  end
+
+
+  def loadProvince
+    items = ["tutte"]
+    items += fetchProvince(@filtro.split.join("_"))
+
+    @segmentedProvince = UISegmentedControl.alloc.initWithItems(items)
+    @segmentedProvince.setSelectedSegmentIndex(0)
+    @segmentedProvince.addTarget(self, action:"changeProvincia:", forControlEvents:UIControlEventValueChanged)
+    @segmentedProvince.delegate = self
+    self.navigationItem.titleView = @segmentedProvince
   end
 
 
@@ -49,9 +51,14 @@ class ClientiController < UITableViewController
     if Device.ipad?
       "clientiDidChange".add_observer(self, :reload)
     end
+    
+    "#{filtro}_retry_sync".add_observer(self, :reloadBackend)
+
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.add_observer(self, "contentSizeCategoryChanged:", nil)
     reload
+
+
   end
 
 
@@ -60,6 +67,9 @@ class ClientiController < UITableViewController
     if Device.ipad?
       "clientiDidChange".remove_observer(self, :reload)
     end
+    
+    "#{filtro}_retry_sync".remove_observer(self, :reloadBackend)
+    
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.remove_observer(self, "contentSizeCategoryChanged:")
   end
@@ -88,8 +98,9 @@ class ClientiController < UITableViewController
     reload
   end
   
+
   def changeProvincia(sender)
-    ##
+    @provincia = @segmentedProvince.titleForSegmentAtIndex sender.selectedSegmentIndex
     reload
   end
 
@@ -153,34 +164,18 @@ class ClientiController < UITableViewController
       if mode == KClientiMode
         klass = Cliente
         key = nil
-
       else
         klass = Appunto
-        key = "cliente.provincia_e_comune"
+        if filtro != "tutti"
+          key = "cliente.provincia_e_comune"
+        else
+          key = nil
+        end
       end
 
       klass.reset
-
-      if filtro == "tutti"
-
-        if mode == KAppuntiMode
-          klass.setSortKeys ['created_at']
-          klass.setSortOrders [false]
-          klass.setSectionKey nil
-        else
-          klass.setSectionKey key
-        end
-        @controller = klass.controller 
-      else
-        klass.setSectionKey key
-        if filtro == "in sospeso"
-          @controller = klass.in_sospeso_controller         
-        elsif filtro == "da fare"
-          @controller = klass.da_fare_controller         
-        else
-          @controller = klass.nel_baule_controller
-        end
-      end
+      klass.setSectionKey key
+      @controller = klass.send("#{@filtro.split.join("_")}_controller", @provincia)
       @controller
     end
   end
@@ -188,17 +183,9 @@ class ClientiController < UITableViewController
 
   # tableViewDelegates
 
+
   def numberOfSectionsInTableView(tableView)
     self.fetchControllerForTableView(tableView).sections.size
-  end
-
-
-  def tableView(tableView, heightForHeaderInSection:section)
-    if mode == KClientiMode
-      1
-    else
-      50
-    end
   end
 
   
@@ -235,6 +222,7 @@ class ClientiController < UITableViewController
     cell
   end
 
+
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
 
     if mode == KAppuntiMode
@@ -246,10 +234,19 @@ class ClientiController < UITableViewController
     end
   end
 
+
+  def tableView(tableView, heightForHeaderInSection:section)
+    if mode == KClientiMode || (mode == KAppuntiMode && @filtro == "tutti")
+      1
+    else
+      50
+    end
+  end
+
   
   def tableView(tableView, viewForHeaderInSection:section)
 
-    if mode == KAppuntiMode
+    if mode == KAppuntiMode && @filtro != "tutti"
       clienteHeader = tableView.dequeueReusableHeaderFooterViewWithIdentifier("headerCliente")
 
       cliente = self.fetchControllerForTableView(tableView).sections[section].objects.firstObject.cliente
@@ -262,16 +259,6 @@ class ClientiController < UITableViewController
       
       clienteHeader.section = section
       clienteHeader.delegate = self
-
-      # isOpened = @sectionsOpened.include? section
-      # clienteHeader.nel_baule.selected = isOpened
-
-      # clienteHeader.titolo   = self.fetchControllerForTableView(tableView).sections[section].name
-      # clienteHeader.quantita = self.fetchControllerForTableView(tableView).sections[section].objects.valueForKeyPath("@count").to_i.to_s
-      
-      # clienteHeader.contentView.backgroundColor = UIColor.darkGrayColor
-      # clienteHeader.section = section
-      # clienteHeader.delegate = self
       
       clienteHeader
     else
@@ -293,12 +280,18 @@ class ClientiController < UITableViewController
     
     if mode == KAppuntiMode
       self.performSegueWithIdentifier("editAppunto", sender:tableView.cellForRowAtIndexPath(indexPath))
+    else
+      cliente = @controller.objectAtIndexPath indexPath
+      clienteForm = ClienteFormController.alloc.initWithCliente(cliente)
+      nav = UINavigationController.alloc.initWithRootViewController clienteForm
+      self.presentModalViewController nav, animated: true
     end
   end
 
-  #
+
   # headerCliente delegate
-  #
+
+
   def headerCliente(headerCliente, didTapBaule:section)
 
     cliente = @controller.sections[section].objects.firstObject.cliente
@@ -314,34 +307,70 @@ class ClientiController < UITableViewController
   end
 
 
+  def reloadBackend
+    # se tolgo questo flag parte due volte loadFromBackend
+    unless @retry_load_backend
+      loadFromBackend
+      @retry_load_backend = true
+    end
+  end
+
+
+  def fetchProvince(scope)
+
+    context = Store.shared.context
+    request = NSFetchRequest.alloc.init
+    entity = NSEntityDescription.entityForName "Cliente", inManagedObjectContext:context
+    request.entity = entity
+
+    request = ScopeInjector.setScopeWithName("#{scope}", toFetchRequest: request)
+    
+    request.propertiesToFetch = NSArray.arrayWithObject(entity.propertiesByName.objectForKey("provincia"))
+    request.returnsDistinctResults = true
+    request.resultType = NSDictionaryResultType;
+
+    #sortDescriptor = NSSortDescriptor.alloc.initWithKey("provincia", ascending:true)
+    #request.setSortDescriptors(NSArray.arrayWithObject(sortDescriptor))
+
+
+    error = Pointer.new(:object)
+    distincResults = context.executeFetchRequest(request, error:error)
+
+    return distincResults.map {|a| a[:provincia]}
+  end
+
+
   private
 
+
     def loadFromBackend
-      
-      Store.shared.login do
         
-        if mode == KClientiMode
+      if mode == KClientiMode
 
-          DataImporter.default.importa_clienti(nil) do |result|
-            @refreshControl.endRefreshing unless @refreshControl.nil?
-            if result.success?
-              reload
-            end          
-          end
+        DataImporter.default.importa_clienti_bis(nil,
+                                 withNotification:"#{filtro}_retry_sync",
+                                          success:lambda do
+                                            @refreshControl.endRefreshing unless @refreshControl.nil?
+                                            reload
+                                            @retry_load_backend = nil
+                                          end,
+                                          failure:lambda do
+                                            @refresControl.endRefreshing unless @refreshControl.nil?
+                                          end)         
+      else
 
-        else
-
-          DataImporter.default.importa_appunti(nil) do |result|
-            @refreshControl.endRefreshing unless @refreshControl.nil?
-            if result.success?
-              reload
-            end  
-          end
-          
-        end
+        DataImporter.default.importa_appunti_bis(nil,
+                                 withNotification:"#{filtro}_reload_clienti",
+                                          success:lambda do
+                                            @refreshControl.endRefreshing unless @refreshControl.nil?
+                                            reload
+                                          end,
+                                          failure:lambda do
+                                            @refresControl.endRefreshing unless @refreshControl.nil?
+                                          end)    
+        
       end
     end
-
 
 
 end

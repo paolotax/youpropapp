@@ -1,8 +1,8 @@
 class LoginController < Formotion::FormController
   
-  PERSIST_AS = :account_settings
-  USERNAME = 'paolotax'
-  PASSWORD = 'sisboccia'
+  PERSIST_AS = :credentials
+  USERNAME = ''
+  PASSWORD = ''
 
 
   def init
@@ -41,16 +41,13 @@ class LoginController < Formotion::FormController
     super.initWithForm(form)
   end
 
-  def viewDidLoad
-    super
-    self.navigationItem.rightBarButtonItem = UIBarButtonItem.alloc.initWithTitle("Login", style: UIBarButtonItemStyleDone, target:self, action:'login')
-  end
 
   def login
     [:username, :password].each { |prop|
       Store.shared.send(prop.to_s + "=", form.render[prop])
+      CredentialStore.default.send(prop.to_s + "=", form.render[prop])
     }
-
     self.navigationController.dismissModalViewControllerAnimated(true)
   end
+  
 end

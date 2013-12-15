@@ -465,10 +465,10 @@
 @implementation AppuntoFormController
 @end
 
-@implementation AppuntoModalController
+@implementation ClienteDetailController
 @end
 
-@implementation ClienteDetailController
+@implementation ClienteFormController
 @end
 
 @implementation ClientiController
@@ -526,6 +526,9 @@
 @end
 
 @implementation SearchClienteController
+@end
+
+@implementation CredentialStore
 @end
 
 @implementation DataImporterResult
@@ -624,7 +627,13 @@
 @implementation Riga
 @end
 
+@implementation SecureMessage
+@end
+
 @implementation Store
+@end
+
+@implementation UserAuthenticator
 @end
 
 @implementation AppuntoCell

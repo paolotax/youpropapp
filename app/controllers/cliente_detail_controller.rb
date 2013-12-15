@@ -235,6 +235,12 @@ class ClienteDetailController < UIViewController
     UIApplication.sharedApplication.openURL(url);
   end 
 
+  
+  def goToSite(sender)
+    url = NSURL.URLWithString("http://youpropa.com/clienti/#{cliente.ClienteId}")
+    UIApplication.sharedApplication.openURL(url);
+  end 
+
   private
 
     def loadFromBackend

@@ -171,156 +171,43 @@ class Appunto < NSManagedObject
   # FILTRI
 
 
-  def self.nel_baule
-    
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
+  ["tutti", "nel_baule", "da_fare", "in_sospeso"].each do |scope|
 
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule = 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("status != 'completato'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
+    define_singleton_method("#{scope}") do
+  
+      context = Store.shared.context
+      request = NSFetchRequest.alloc.init
+      request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
 
-    request.sortDescriptors = ["cliente.provincia", "cliente.comune", "cliente.nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
+      request = ScopeInjector.setScopeWithName("appunti_#{scope}", toFetchRequest:request)
+      
+      error_ptr = Pointer.new(:object)
+      data = context.executeFetchRequest(request, error:error_ptr)
+      if data == nil
+        raise "Error when fetching data: #{error_ptr[0].description}"
+      end
+      data
     end
-    data
-  end
 
-  def self.nel_baule_controller
-    
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule = 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("status != 'completato'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
+    define_singleton_method("#{scope}_controller") do |provincia|
+  
+      context = Store.shared.context
+      request = NSFetchRequest.alloc.init
+      request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
 
-    request.sortDescriptors = ["cliente.provincia", "cliente.comune", "cliente.nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-        
-    error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
-    unless controller.performFetch(error_ptr)
-      raise "Error when fetching data: #{error_ptr[0].description}"
+      request = ScopeInjector.setScopeWithName("appunti_#{scope}", toFetchRequest:request)
+      if provincia
+        request = ScopeInjector.addProvinciaScope(provincia, toFetchRequest:request)
+      end   
+
+      error_ptr = Pointer.new(:object)
+      controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
+      unless controller.performFetch(error_ptr)
+        raise "Error when fetching data: #{error_ptr[0].description}"
+      end
+      
+      controller
     end
-    controller
   end
-
-  def self.in_sospeso
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("status = 'in_sospeso'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-    
-    request.sortDescriptors = ["cliente.provincia", "cliente.comune", "cliente.nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
-
-  def self.in_sospeso_controller
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("status = 'in_sospeso'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    request.sortDescriptors = ["cliente.provincia", "cliente.comune", "cliente.nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-
-    error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
-    unless controller.performFetch(error_ptr)
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    
-    controller
-  end
-
-  def self.da_fare
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("status != 'in_sospeso' and status != 'completato'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-    
-    request.sortDescriptors = ["cliente.provincia", "cliente.comune", "cliente.nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
-
-  def self.da_fare_controller
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
-
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule != 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("status != 'in_sospeso' and status != 'completato'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    request.sortDescriptors = ["cliente.provincia", "cliente.comune", "cliente.nome"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-
-    error_ptr = Pointer.new(:object)
-    controller = NSFetchedResultsController.alloc.initWithFetchRequest(request, managedObjectContext:context, sectionNameKeyPath:@sectionKey, cacheName:nil)      
-    unless controller.performFetch(error_ptr)
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    
-    controller
-  end
-
 
 end

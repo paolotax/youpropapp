@@ -1205,11 +1205,6 @@
 
 @end
 
-@interface AppuntoModalController: UIViewController
--(IBAction) close:(id) sender;
-
-@end
-
 @interface ClienteDetailController: UIViewController
 
 @property IBOutlet id tableView;
@@ -1227,7 +1222,17 @@
 -(IBAction) navigate:(id) sender;
 -(IBAction) makeCall:(id) sender;
 -(IBAction) sendEmail:(id) sender;
+-(IBAction) goToSite:(id) sender;
 -(IBAction) loadFromBackend;
+
+@end
+
+@interface ClienteFormController: Formotion
+-(IBAction) init;
+-(IBAction) initWithCliente:(id) cliente;
+-(IBAction) viewDidLoad;
+-(IBAction) submit;
+-(IBAction) tipi_clienti_rows;
 
 @end
 
@@ -1425,7 +1430,6 @@
 
 @interface LoginController: Formotion
 -(IBAction) init;
--(IBAction) viewDidLoad;
 -(IBAction) login;
 
 @end
@@ -1504,12 +1508,21 @@
 
 @end
 
+@interface CredentialStore
+-(IBAction) clear_saved_credential_store;
+-(IBAction) token;
+-(IBAction) username;
+-(IBAction) password;
+
+@end
+
 @interface DataImporterResult
 -(IBAction) body;
 
 @end
 
 @interface DataImporter
+-(IBAction) errorMessageForResponse:(id) operation;
 -(IBAction) sync_appunti;
 
 @end
@@ -1708,7 +1721,15 @@
 @interface Riga: NSManagedObject
 @end
 
+@interface SecureMessage
+-(IBAction) init;
+-(IBAction) errorMessageForResponse:(id) operation;
+
+@end
+
 @interface Store
+-(IBAction) set_token_header;
+-(IBAction) token_changed:(id) notification;
 -(IBAction) client;
 -(IBAction) setupReachability;
 -(IBAction) context;
@@ -1720,6 +1741,12 @@
 -(IBAction) clear;
 -(IBAction) stats;
 -(IBAction) initialize;
+
+@end
+
+@interface UserAuthenticator
+-(IBAction) retryOperationForOperation:(id) operation;
+-(IBAction) errorMessageForResponse:(id) operation;
 
 @end
 

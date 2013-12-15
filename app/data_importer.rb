@@ -32,10 +32,10 @@ class DataImporter
 
 
   # importa_...  I love metaprogramming
-
+  # da eliminare 
   ["clienti", "appunti", "righe", "classi", "libri", "adozioni"].each do |table|
 
-    define_method("importa_#{table}") do |parameters, &callback|
+    define_method("importa_#{table}:") do |parameters, &callback|
 
       Store.shared.login do
         Store.shared.backend.getObjectsAtPath("api/v1/#{table}",
@@ -55,9 +55,68 @@ class DataImporter
   end
 
 
+  ["clienti", "appunti", "righe", "classi", "libri", "adozioni"].each do |table|
+        
+    define_method("importa_#{table}_bis:withNotification:success:failure:") do |parameters, notification, success, failure|
+
+      processSuccessBlock = lambda do
+        success.call
+      end
+      
+      processFailureBlock = lambda do
+        failure.call
+        # if (operation.HTTPRequestOperation.response.statusCode == 500)
+        #   failure.call("Something went wrong!")
+        # else
+        #   errorMessage = self.errorMessageForResponse operation
+        #   failure.call(errorMessage)
+        # end
+      end
+
+      token = CredentialStore.default.token
+      Store.shared.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
+
+      Store.shared.backend.getObjectsAtPath("/api/v1/#{table}",
+                                 parameters:parameters,
+                                    success:lambda do |operation, responseObject|
+                                      result = DataImporterResult.new(operation, responseObject, nil)
+                                      NSLog "#{table}: #{result.object.array.count}"
+                                      processSuccessBlock.call
+                                    end,
+                                    
+                                    failure:lambda do |operation, error|
+                                      puts "status=#{operation.HTTPRequestOperation.response.statusCode}"
+                                      if (operation.HTTPRequestOperation.response.statusCode == 401)
+                                        CredentialStore.default.token = nil
+                                        auth = UserAuthenticator.new
+                                        auth.refreshTokenAndRetryOperation(operation,
+                                             withNotification:notification,
+                                                      success:lambda do
+                                                        processSuccessBlock.call
+                                                      end,
+                                                      failure:lambda do
+                                                        processFailureBlock.call
+                                                      end)
+                                      else
+                                        processFailureBlock.call
+                                      end
+                                    end)
+    end
+  end
+
+
+  def errorMessageForResponse(operation)
+    puts operation.HTTPRequestOperation.responseString
+    # jsonData = operation.HTTPRequestOperation.responseString.dataUsingEncoding(NSUTF8StringEncoding)
+    # json = NSJSONSerialization.JSONObjectWithData(jsonData, options:0, error:nil)
+    # errorMessage = json.objectForKey "error"
+    # errorMessage
+  end
+
+
   def sync_appunti
-    Store.shared.login do
-      puts "loggato"
+    #Store.shared.login do
+      
       context = Store.shared.context
 
       request = NSFetchRequest.alloc.init
@@ -75,15 +134,20 @@ class DataImporter
       data
 
       for appunto in data do
-        appunto.save_to_backend do |result|
-          if result.success?
-            puts appunto.remote_id
-          else
-            puts "error"
-          end
-        end
+
+        appunto.save_to_backend(nil, 
+                     withNotification:"retrySave", 
+                              success:lambda do
+                                NSLog("loggo")
+                                puts "success"
+                              end, 
+                              failure:lambda do
+                                NSLog("loggo")
+                                puts "failure"
+                              end)
+
       end
-    end
+    #end
   end
 
 

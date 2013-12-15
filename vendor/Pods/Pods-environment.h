@@ -18,6 +18,12 @@
 #define COCOAPODS_VERSION_MINOR_CustomBadge 0
 #define COCOAPODS_VERSION_PATCH_CustomBadge 0
 
+// HTAutocompleteTextField
+#define COCOAPODS_POD_AVAILABLE_HTAutocompleteTextField
+#define COCOAPODS_VERSION_MAJOR_HTAutocompleteTextField 1
+#define COCOAPODS_VERSION_MINOR_HTAutocompleteTextField 2
+#define COCOAPODS_VERSION_PATCH_HTAutocompleteTextField 6
+
 // ISO8601DateFormatterValueTransformer
 #define COCOAPODS_POD_AVAILABLE_ISO8601DateFormatterValueTransformer
 #define COCOAPODS_VERSION_MAJOR_ISO8601DateFormatterValueTransformer 0
@@ -35,6 +41,12 @@
 #define COCOAPODS_VERSION_MAJOR_RNFrostedSidebar 0
 #define COCOAPODS_VERSION_MINOR_RNFrostedSidebar 2
 #define COCOAPODS_VERSION_PATCH_RNFrostedSidebar 0
+
+// Reachability
+#define COCOAPODS_POD_AVAILABLE_Reachability
+#define COCOAPODS_VERSION_MAJOR_Reachability 3
+#define COCOAPODS_VERSION_MINOR_Reachability 1
+#define COCOAPODS_VERSION_PATCH_Reachability 1
 
 // RestKit
 #define COCOAPODS_POD_AVAILABLE_RestKit
@@ -77,6 +89,12 @@
 #define COCOAPODS_VERSION_MAJOR_SOCKit 1
 #define COCOAPODS_VERSION_MINOR_SOCKit 1
 #define COCOAPODS_VERSION_PATCH_SOCKit 0
+
+// SVProgressHUD
+#define COCOAPODS_POD_AVAILABLE_SVProgressHUD
+#define COCOAPODS_VERSION_MAJOR_SVProgressHUD 1
+#define COCOAPODS_VERSION_MINOR_SVProgressHUD 0
+#define COCOAPODS_VERSION_PATCH_SVProgressHUD 0
 
 // TransitionKit
 #define COCOAPODS_POD_AVAILABLE_TransitionKit
