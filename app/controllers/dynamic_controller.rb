@@ -74,6 +74,15 @@ class DynamicController < UIViewController
       end
     end
 
+    "reload_clienti_and_views".add_observer(self, "reload_details:", nil)
+  end
+
+
+  def reload_details(sender)
+    puts "reload"
+    @views.each do |v|
+      v.loadData
+    end
   end
 
   def addMotionEffectToView(view,  magnitude:magnitude)

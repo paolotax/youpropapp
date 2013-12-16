@@ -64,7 +64,19 @@ class DynamicNewController < UIViewController
       offset -= 77.0
     end
 
+    "reload_clienti_and_views".add_observer(self, "reload_details:", nil)
   end
+
+
+  def reload_details(notification)
+    filtro = notification.userInfo[:filtro]
+    @views.each do |v|
+      if v.clientiVC.filtro != filtro
+        v.loadData
+      end
+    end
+  end
+
 
   def addMotionEffectToView(view,  magnitude:magnitude)
     xMotion = UIInterpolatingMotionEffect.alloc.initWithKeyPath("center.x", type:UIInterpolatingMotionEffectTypeTiltAlongHorizontalAxis)

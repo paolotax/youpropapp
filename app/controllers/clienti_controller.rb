@@ -11,6 +11,7 @@ class ClientiController < UITableViewController
     super
 
     self.mode = KClientiMode
+    @provincia = "tutte"
 
     self.tableView.layer.cornerRadius = 10
     self.navigationController.toolbarHidden = false
@@ -34,18 +35,6 @@ class ClientiController < UITableViewController
   end
 
 
-  def loadProvince
-    items = ["tutte"]
-    items += fetchProvince(@filtro.split.join("_"))
-
-    @segmentedProvince = UISegmentedControl.alloc.initWithItems(items)
-    @segmentedProvince.setSelectedSegmentIndex(0)
-    @segmentedProvince.addTarget(self, action:"changeProvincia:", forControlEvents:UIControlEventValueChanged)
-    @segmentedProvince.delegate = self
-    self.navigationItem.titleView = @segmentedProvince
-  end
-
-
   def viewWillAppear(animated)
     super
     if Device.ipad?
@@ -57,8 +46,6 @@ class ClientiController < UITableViewController
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.add_observer(self, "contentSizeCategoryChanged:", nil)
     reload
-
-
   end
 
 
@@ -79,17 +66,79 @@ class ClientiController < UITableViewController
     self.tableView.reloadData
   end
 
+
+#pragma mark - actions
+
   
   def reload
     @controller = nil
     self.tableView.reloadData
-
     if mode == KClientiMode
       tabella = "clienti"
     else
       tabella = 'appunti'
     end
     "#{filtro}changeTitolo".post_notification( self, titolo: filtro, sottotitolo: "#{@controller.fetchedObjects.count} #{tabella}" )
+  end
+
+
+  def loadProvince
+    
+    if @controller
+
+      if @segmentedProvince
+        @segmentedProvince.removeFromSuperview
+        @segmentedProvince = nil
+      end
+      
+      #items = ["tutte"] + @controller.fetchedObjects.map {|c| c.provincia}.uniq
+      items = ["tutte"] + fetchProvince(@filtro.split.join('_'))
+
+      @segmentedProvince = UISegmentedControl.alloc.initWithItems(items)
+      @segmentedProvince.addTarget(self, action:"changeProvincia:", forControlEvents:UIControlEventValueChanged)
+      @segmentedProvince.delegate = self
+      self.navigationItem.titleView = @segmentedProvince
+            
+      (0..@segmentedProvince.numberOfSegments-1).each do |index|
+        if @provincia == @segmentedProvince.titleForSegmentAtIndex(index)
+          @segmentedProvince.setSelectedSegmentIndex(index)
+          return
+        end
+      end
+    end
+
+  end
+
+
+  def reloadBackend
+    # se tolgo questo flag parte due volte loadFromBackend
+    unless @retry_load_backend
+      loadFromBackend
+      @retry_load_backend = true
+    end
+  end
+
+
+  def fetchProvince(scope)
+    Cliente.reset
+    context = Store.shared.context
+    request = NSFetchRequest.alloc.init
+    entity = NSEntityDescription.entityForName "Cliente", inManagedObjectContext:context
+    request.entity = entity
+
+    request = ScopeInjector.setScopeWithName("#{scope}", toFetchRequest: request)
+    
+    request.propertiesToFetch = NSArray.arrayWithObject(entity.propertiesByName.objectForKey("provincia"))
+    request.returnsDistinctResults = true
+    request.resultType = NSDictionaryResultType;
+
+    #sortDescriptor = NSSortDescriptor.alloc.initWithKey("provincia", ascending:true)
+    #request.setSortDescriptors(NSArray.arrayWithObject(sortDescriptor))
+
+    error = Pointer.new(:object)
+    distinctResults = context.executeFetchRequest(request, error:error)
+    puts distinctResults
+    return distinctResults.map {|a| a[:provincia]}
   end
 
 
@@ -127,12 +176,16 @@ class ClientiController < UITableViewController
       end
       sender.nel_baule = cliente.nel_baule
     end
-
+    Store.shared.save
+    Store.shared.persist
+    "reload_clienti_and_views".post_notification(self, filtro: @filtro)
     "bauleDidChange".post_notification
   end
 
 
-  # Storyboard methods
+#pragma mark - Storyboard methods
+
+
   def prepareForSegue(segue, sender:sender)
     
     if segue.identifier.isEqualToString("showCliente")
@@ -155,6 +208,9 @@ class ClientiController < UITableViewController
     end
 
   end
+
+
+#pragma mark - controller
 
 
   def fetchControllerForTableView(tableView)
@@ -181,7 +237,7 @@ class ClientiController < UITableViewController
   end
 
 
-  # tableViewDelegates
+#pragma mark - tableView Delegates
 
 
   def numberOfSectionsInTableView(tableView)
@@ -289,7 +345,7 @@ class ClientiController < UITableViewController
   end
 
 
-  # headerCliente delegate
+#pragma mark - headerCliente delegate
 
 
   def headerCliente(headerCliente, didTapBaule:section)
@@ -304,72 +360,54 @@ class ClientiController < UITableViewController
     Store.shared.persist
 
     headerCliente.circle_button.nel_baule = cliente.nel_baule
+
+    "reload_clienti_and_views".post_notification(self, filtro: @filtro)
   end
 
 
-  def reloadBackend
-    # se tolgo questo flag parte due volte loadFromBackend
-    unless @retry_load_backend
-      loadFromBackend
-      @retry_load_backend = true
-    end
-  end
-
-
-  def fetchProvince(scope)
-
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    entity = NSEntityDescription.entityForName "Cliente", inManagedObjectContext:context
-    request.entity = entity
-
-    request = ScopeInjector.setScopeWithName("#{scope}", toFetchRequest: request)
-    
-    request.propertiesToFetch = NSArray.arrayWithObject(entity.propertiesByName.objectForKey("provincia"))
-    request.returnsDistinctResults = true
-    request.resultType = NSDictionaryResultType;
-
-    #sortDescriptor = NSSortDescriptor.alloc.initWithKey("provincia", ascending:true)
-    #request.setSortDescriptors(NSArray.arrayWithObject(sortDescriptor))
-
-
-    error = Pointer.new(:object)
-    distincResults = context.executeFetchRequest(request, error:error)
-
-    return distincResults.map {|a| a[:provincia]}
-  end
 
 
   private
 
 
     def loadFromBackend
-        
-      if mode == KClientiMode
+     
+      if Store.shared.isReachable? == true 
 
-        DataImporter.default.importa_clienti_bis(nil,
-                                 withNotification:"#{filtro}_retry_sync",
-                                          success:lambda do
-                                            @refreshControl.endRefreshing unless @refreshControl.nil?
-                                            reload
-                                            @retry_load_backend = nil
-                                          end,
-                                          failure:lambda do
-                                            @refresControl.endRefreshing unless @refreshControl.nil?
-                                          end)         
+
+        if mode == KClientiMode
+
+          DataImporter.default.importa_clienti_bis(nil,
+                                   withNotification:"#{filtro}_retry_sync",
+                                            success:lambda do
+                                              @refreshControl.endRefreshing unless @refreshControl.nil?
+                                              reload
+                                              @retry_load_backend = nil
+                                              "reload_clienti_and_views".post_notification(self, filtro: NSDictionaryResultType)
+                                            end,
+                                            failure:lambda do
+                                              @refreshControl.endRefreshing unless @refreshControl.nil?
+                                            end)         
+        else
+
+          DataImporter.default.importa_appunti_bis(nil,
+                                   withNotification:"#{filtro}_reload_clienti",
+                                            success:lambda do
+                                              @refreshControl.endRefreshing unless @refreshControl.nil?
+                                              reload
+                                              "reload_clienti_and_views".post_notification(self, filtro: nil)
+                                            end,
+                                            failure:lambda do
+                                              @refreshControl.endRefreshing unless @refreshControl.nil?
+                                            end)    
+          
+        end
+      
       else
-
-        DataImporter.default.importa_appunti_bis(nil,
-                                 withNotification:"#{filtro}_reload_clienti",
-                                          success:lambda do
-                                            @refreshControl.endRefreshing unless @refreshControl.nil?
-                                            reload
-                                          end,
-                                          failure:lambda do
-                                            @refresControl.endRefreshing unless @refreshControl.nil?
-                                          end)    
-        
+        @refreshControl.endRefreshing unless @refreshControl.nil?
+        App.alert("Dispositivo non connesso. Riprova più tardi")
       end
+
     end
 
 

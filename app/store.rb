@@ -117,27 +117,43 @@ class Store
 
 
   def setupReachability
-    client.operationQueue.maxConcurrentOperationCount = 1
-    client.operationQueue.suspended = true
 
-    @reachability = Reachability.reachabilityWithHostname(BASE_URL)
-    
-    @reachability.reachableBlock = lambda do |reachable| 
+    client.reachabilityStatusChangeBlock = lambda do |status| 
       #client.operationQueue.suspended = false
-      puts "reachable"
+      if (status == AFNetworkReachabilityStatusNotReachable)
+        puts "Not reachable"
+      else
+        puts "Reachable"
+      end
+
+      if status == AFNetworkReachabilityStatusReachableViaWiFi
+        puts "on WiFi"
+      end
     end    
+
+    # client.operationQueue.maxConcurrentOperationCount = 1
+    # client.operationQueue.suspended = true
+
+    # @reachability = Reachability.reachabilityWithHostname("youpropa.com")
     
-    @reachability.unreachableBlock = lambda do |reachable| 
-      #client.operationQueue.suspended = true
-      puts "unreachable"
-    end
+    # @reachability.reachableBlock = lambda do |reachable| 
+    #   #client.operationQueue.suspended = false
+    #   puts "reachable"
+    # end    
     
-    @reachability.startNotifier
+    # @reachability.unreachableBlock = lambda do |reachable| 
+    #   #client.operationQueue.suspended = true
+    #   puts "unreachable"
+    # end
+    
+    # @reachability.startNotifier
   end
 
 
   def isReachable?
-    @reachability.isReachable == true
+    #@reachability.isReachable == true
+
+    client.networkReachabilityStatus != AFNetworkReachabilityStatusNotReachable 
   end
 
 

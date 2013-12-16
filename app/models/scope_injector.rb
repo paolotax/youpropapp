@@ -27,7 +27,7 @@ class ScopeInjector
 
   def self.setScopeWithName(name, toFetchRequest:request)
 
-    pred = request.predicate
+    pred = nil
     predicates = []
 
     if name == "tutti"
@@ -38,7 +38,7 @@ class ScopeInjector
 
     elsif name == "nel_baule"
 
-      predicates.addObject(NSPredicate.predicateWithFormat("nel_baule = 1"))
+      predicates.addObject(NSPredicate.predicateWithFormat("nel_baule == 1"))
       pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
       request.predicate = pred
 

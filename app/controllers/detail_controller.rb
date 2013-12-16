@@ -46,7 +46,6 @@ class DetailController < UIViewController
     else
       self.labelSottotitolo.text = ""
     end
-
   end
 
   def loadData
@@ -61,8 +60,9 @@ class DetailController < UIViewController
     clientiVC.tableView.setTintColor color
     clientiVC.navigationController.navigationBar.setTintColor color
     clientiVC.navigationController.toolbar.setTintColor color
-    clientiVC.loadProvince   
+    
     clientiVC.reload
+    clientiVC.loadProvince   
   
     self.labelSottotitolo.color = color
   end
