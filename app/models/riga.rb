@@ -27,18 +27,18 @@ class Riga < NSManagedObject
   ]
 
 
-
-
-
   def self.addToAppunto(appunto, withLibro:libro)
     riga = Riga.add do |r|
       
       r.riga_uuid = BubbleWrap.create_uuid.downcase
+      
       r.appunto = appunto
+      r.libro = libro
+      
       r.remote_appunto_id = appunto.remote_id 
-      r.libro = libro  
       r.libro_id = libro.remote_id
       r.titolo   = libro.titolo
+
       r.prezzo_copertina    = libro.prezzo_copertina
       r.prezzo_consigliato  = libro.prezzo_consigliato
 
@@ -50,34 +50,15 @@ class Riga < NSManagedObject
         r.sconto   = 0
       end 
 
+      puts r.changedValues
+      
+      r.appunto.updated_at = Time.now
       r.quantita = 1
-      #r.importo = 
+
     end
     riga
   end
 
-  def self.nel_baule
-    context = Store.shared.context
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:context)
 
-    pred = nil
-    predicates = [] 
-    predicates.addObject(NSPredicate.predicateWithFormat("appunto.cliente.nel_baule = 1"))
-    predicates.addObject(NSPredicate.predicateWithFormat("appunto.status != 'completato'"))
-    pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
-    request.predicate = pred
-
-    request.sortDescriptors = ["appunto.remote_id", "libro_id"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
-    }
-    
-    error_ptr = Pointer.new(:object)
-    data = context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
-  end
 
 end

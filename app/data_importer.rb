@@ -80,6 +80,8 @@ class DataImporter
                                  parameters:parameters,
                                     success:lambda do |operation, responseObject|
                                       result = DataImporterResult.new(operation, responseObject, nil)
+                                      userDefaults = NSUserDefaults.standardUserDefaults.setObject Time.now, forKey:"last_#{table}_sync"
+                                      userDefaults.synchronize                          
                                       NSLog "#{table}: #{result.object.array.count}"
                                       processSuccessBlock.call
                                     end,
@@ -114,17 +116,24 @@ class DataImporter
   end
 
 
-  def sync_appunti
-    #Store.shared.login do
+  def sync_entity(entity_name, success:success, failure:failure)
+    
+    Store.shared.login do
       
       context = Store.shared.context
 
       request = NSFetchRequest.alloc.init
-      entity = NSEntityDescription.entityForName("Appunto", inManagedObjectContext:context)
+      entity = NSEntityDescription.entityForName(entity_name, inManagedObjectContext:context)
       request.setEntity(entity)
 
-      predicate = NSPredicate.predicateWithFormat("remote_id == 0")
+      last_sync_date = NSUserDefaults.standardUserDefaults.objectForKey "last_appunti_sync"
+
+      predicate = NSPredicate.predicateWithFormat("remote_id == 0 or updated_at > %@", argumentArray:[last_sync_date])
       request.setPredicate(predicate)
+
+      request.sortDescriptors = ["updated_at"].collect { |sortKey|
+        NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
+      }
 
       error_ptr = Pointer.new(:object)
       data = context.executeFetchRequest(request, error:error_ptr)
@@ -134,20 +143,39 @@ class DataImporter
       data
 
       for appunto in data do
-
+        puts appunto.remote_id
         appunto.save_to_backend(nil, 
                      withNotification:"retrySave", 
                               success:lambda do
-                                NSLog("loggo")
-                                puts "success"
+ 
+                                userDefaults = NSUserDefaults.standardUserDefaults.setObject appunto.updated_at, forKey:"last_appunti_sync"
+                                userDefaults.synchronize
+                                success.call
                               end, 
                               failure:lambda do
-                                NSLog("loggo")
-                                puts "failure"
+                                userDefaults = NSUserDefaults.standardUserDefaults.setObject last_sync_date, forKey:"last_appunti_sync"
+                                userDefaults.synchronize
+                                failure.call
+                                return
                               end)
 
       end
-    #end
+
+      params = { updated_at: last_sync_date }
+      DataImporter.default.importa_appunti_bis(params,
+                         withNotification:nil,
+                                  success:lambda do
+                                    userDefaults = NSUserDefaults.standardUserDefaults.setObject Time.now, forKey:"last_appunti_sync"
+                                    userDefaults.synchronize
+                                    success.call
+                                  end,
+                                  failure:lambda do
+                                    userDefaults = NSUserDefaults.standardUserDefaults.setObject last_sync_date, forKey:"last_appunti_sync"
+                                    userDefaults.synchronize
+                                    failure.call
+                                  end) 
+    end
+
   end
 
 

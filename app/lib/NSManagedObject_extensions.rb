@@ -36,21 +36,6 @@ class NSManagedObject
     @searchController ||= NSFetchRequest.fetchObjectsForEntityForName(name, withSectionKey:@sectionKey, withSortKeys:@sortKeys, ascending:@sortOrders, withsearchKey:@searchKey, withSearchString:searchString, withSearchScope:searchScope, inManagedObjectContext:Store.shared.context)
   end
 
-  def self.objects_to_sync
-    #@objects ||= 
-  end
-
-  def refresh_backend
-    Store.shared.backend.getObject(self, path:nil, parameters:nil, 
-                        success:lambda do |operation, result|
-                                  Store.shared.persist                                    
-                                  "appuntiListDidLoadBackend".post_notification
-                                  "reload_appunti_collections".post_notification
-                                  "clientiListDidLoadBackend".post_notification
-                                end, 
-                        failure:lambda do |operation, error|
-                                end)
-  end
   
   def remove_from_backend(&callback)
     if self.remote_id != 0  
@@ -67,89 +52,52 @@ class NSManagedObject
     end
   end
 
-  def save_to_backend(&callback)
-    Store.shared.login do
-      if self.remote_id == 0  
-        Store.shared.backend.postObject(self, path:nil, parameters:nil, 
-                            success:lambda do |operation, responseObject|
-
-                                      result = DataImporterResult.new(operation, responseObject, nil)
-                                      callback.call(result)
-
-                                    end, 
-                            failure:lambda do |operation, error|
-                                      
-                                      result = DataImporterResult.new(operation, nil, error)
-                                      callback.call(result)
-                                      
-                                      App.alert("#{error.localizedDescription}")
-                                    end)
-      else
-        Store.shared.backend.putObject(self, path:nil, parameters:nil, 
-                            success:lambda do |operation, responseObject|
-
-                                      result = DataImporterResult.new(operation, responseObject, nil)
-                                      callback.call(result)
-
-                                    end, 
-                            failure:lambda do |operation, error|
-                                      result = DataImporterResult.new(operation, nil, error)
-
-                                      callback.call(result)
-                                      App.alert("#{error.localizedDescription}")
-                                    end)
-      end
-    end
-  end
-
 
   def save_to_backend(parameters, withNotification:notification, success:success, failure:
     failure)
 
-    puts "succ.#{success}"
     processSuccessBlock = lambda do
-      puts "processSuccessBlock"
       success.call
     end
     
     processFailureBlock = lambda do
-      puts "processFailureBlock"
       failure.call
     end
-
-    puts "evvai save"
 
     token = CredentialStore.default.token
     Store.shared.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
 
     if remote_id == 0
-
-      Store.shared.backend.postObject(self, 
-                                       path:nil,
-                                 parameters:parameters,
-                                    success:lambda do |operation, responseObject|
-                                      result = DataImporterResult.new(operation, responseObject, nil)
-                                      NSLog "Postato #{self.remote_id}"
-                                      processSuccessBlock.call
-                                    end,                                   
-                                    failure:lambda do |operation, error|
-                                      puts "status=#{operation.HTTPRequestOperation.response.statusCode}"
-                                      if (operation.HTTPRequestOperation.response.statusCode == 401)
-                                        CredentialStore.default.token = nil
-                                        auth = UserAuthenticator.new
-                                        auth.refreshTokenAndRetryOperation(operation,
-                                             withNotification:notification,
-                                                      success:lambda do
-                                                        processSuccessBlock.call
-                                                      end,
-                                                      failure:lambda do
-                                                        processFailureBlock.call
-                                                      end)
-                                      else
-                                        processFailureBlock.call
-                                      end
-                                    end)
+      method = "postObject:path:parameters:success:failure:"
+    else
+      method = "putObject:path:parameters:success:failure:"
     end
+
+    successBlock = lambda do |operation, responseObject|
+      result = DataImporterResult.new(operation, responseObject, nil)
+      NSLog "Postato #{self.remote_id}"
+      processSuccessBlock.call
+    end
+
+    failureBlock = lambda do |operation, error|
+      puts "status=#{operation.HTTPRequestOperation.response.statusCode}"
+      if (operation.HTTPRequestOperation.response.statusCode == 401)
+        CredentialStore.default.token = nil
+        auth = UserAuthenticator.new
+        auth.refreshTokenAndRetryOperation(operation,
+             withNotification:notification,
+                      success:lambda do
+                        processSuccessBlock.call
+                      end,
+                      failure:lambda do
+                        processFailureBlock.call
+                      end)
+      else
+        processFailureBlock.call
+      end
+    end
+    
+    Store.shared.backend.send( method, self, nil, parameters, successBlock, failureBlock)
   end
 
 

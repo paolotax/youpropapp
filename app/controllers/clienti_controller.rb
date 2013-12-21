@@ -132,12 +132,8 @@ class ClientiController < UITableViewController
     request.returnsDistinctResults = true
     request.resultType = NSDictionaryResultType;
 
-    #sortDescriptor = NSSortDescriptor.alloc.initWithKey("provincia", ascending:true)
-    #request.setSortDescriptors(NSArray.arrayWithObject(sortDescriptor))
-
     error = Pointer.new(:object)
     distinctResults = context.executeFetchRequest(request, error:error)
-    puts distinctResults
     return distinctResults.map {|a| a[:provincia]}
   end
 
@@ -158,7 +154,6 @@ class ClientiController < UITableViewController
     indexPath = @controller.indexPathForObject(cliente)
     self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition:UITableViewScrollPositionTop, animated:false)
     cell = self.tableView.cellForRowAtIndexPath(indexPath)
-    #cell.setSelected(true, animated:true)
     self.performSegueWithIdentifier("showCliente", sender:cell)
   end
 
@@ -166,7 +161,6 @@ class ClientiController < UITableViewController
   def buttonTappedAction(sender)
     buttonPosition = sender.convertPoint(CGPointZero, toView:self.tableView)
     indexPath = self.tableView.indexPathForRowAtPoint buttonPosition
-
     if indexPath
       cliente = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
       if cliente.nel_baule == 0
@@ -201,8 +195,8 @@ class ClientiController < UITableViewController
 
       controller = segue.destinationViewController.topViewController
       controller.cliente = appunto.cliente
-      indexPath = self.tableView.indexPathForCell(sender)
       controller.appunto = appunto
+      controller.delegate = self
       controller.isNew = false
       controller.presentedAsModal = true
     end
@@ -210,7 +204,7 @@ class ClientiController < UITableViewController
   end
 
 
-#pragma mark - controller
+#pragma mark - dataSource controller
 
 
   def fetchControllerForTableView(tableView)
@@ -237,7 +231,7 @@ class ClientiController < UITableViewController
   end
 
 
-#pragma mark - tableView Delegates
+#pragma mark - tableView delegates
 
 
   def numberOfSectionsInTableView(tableView)
@@ -345,6 +339,23 @@ class ClientiController < UITableViewController
   end
 
 
+#pragma mark - AppuntoFormController delegate 
+  
+
+  def appuntoFormController(appuntoFormController, didSaveAppunto:appunto)
+
+    appuntoFormController.dismissViewControllerAnimated(true, completion:nil)
+    DataImporter.default.sync_entity("Appunto",
+                          success:lambda do
+                            reload
+                          end,
+                          failure:lambda do
+                            App.alert "Impossibile salvare dati sul server"
+                          end) 
+
+  end
+
+
 #pragma mark - headerCliente delegate
 
 
@@ -358,13 +369,9 @@ class ClientiController < UITableViewController
     end
     Store.shared.save
     Store.shared.persist
-
     headerCliente.circle_button.nel_baule = cliente.nel_baule
-
     "reload_clienti_and_views".post_notification(self, filtro: @filtro)
   end
-
-
 
 
   private
@@ -372,42 +379,38 @@ class ClientiController < UITableViewController
 
     def loadFromBackend
      
-      if Store.shared.isReachable? == true 
-
-
-        if mode == KClientiMode
-
-          DataImporter.default.importa_clienti_bis(nil,
-                                   withNotification:"#{filtro}_retry_sync",
-                                            success:lambda do
-                                              @refreshControl.endRefreshing unless @refreshControl.nil?
-                                              reload
-                                              @retry_load_backend = nil
-                                              "reload_clienti_and_views".post_notification(self, filtro: NSDictionaryResultType)
-                                            end,
-                                            failure:lambda do
-                                              @refreshControl.endRefreshing unless @refreshControl.nil?
-                                            end)         
-        else
-
-          DataImporter.default.importa_appunti_bis(nil,
-                                   withNotification:"#{filtro}_reload_clienti",
-                                            success:lambda do
-                                              @refreshControl.endRefreshing unless @refreshControl.nil?
-                                              reload
-                                              "reload_clienti_and_views".post_notification(self, filtro: nil)
-                                            end,
-                                            failure:lambda do
-                                              @refreshControl.endRefreshing unless @refreshControl.nil?
-                                            end)    
-          
-        end
-      
-      else
+      if Store.shared.isReachable? == false
         @refreshControl.endRefreshing unless @refreshControl.nil?
         App.alert("Dispositivo non connesso. Riprova più tardi")
       end
 
+      if mode == KClientiMode
+
+        DataImporter.default.importa_clienti_bis(nil,
+                                 withNotification:"#{filtro}_retry_sync",
+                                          success:lambda do
+                                            @refreshControl.endRefreshing unless @refreshControl.nil?
+                                            reload
+                                            @retry_load_backend = nil
+                                            "reload_clienti_and_views".post_notification(self, filtro: NSDictionaryResultType)
+                                          end,
+                                          failure:lambda do
+                                            @refreshControl.endRefreshing unless @refreshControl.nil?
+                                          end)         
+      else
+
+        DataImporter.default.importa_appunti_bis(nil,
+                                 withNotification:"#{filtro}_reload_clienti",
+                                          success:lambda do
+                                            @refreshControl.endRefreshing unless @refreshControl.nil?
+                                            reload
+                                            "reload_clienti_and_views".post_notification(self, filtro: nil)
+                                          end,
+                                          failure:lambda do
+                                            @refreshControl.endRefreshing unless @refreshControl.nil?
+                                          end)    
+        
+      end
     end
 
 

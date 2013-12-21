@@ -200,7 +200,6 @@ class DynamicNewController < UIViewController
         @viewDocked = nil
         @snap = nil
       else
-        puts "# 3. the gesture has ended"
         self.tryDockView(draggedView)
       end
       
@@ -264,9 +263,6 @@ class DynamicNewController < UIViewController
   end
 
   def moveDownViews(view)
-
-    puts "moveDown"
-
     top = self.view.frame.size.height - 25 - 20
     for aView in @views
       top += 5
@@ -327,9 +323,6 @@ class DynamicNewController < UIViewController
     end
   end
 
-  # def tableView(tableView, titleForHeaderInSection:section)
-  #   self.fetchControllerForTableView(tableView).sections[section].name
-  # end
   
   def tableView(tableView, numberOfRowsInSection:section)
     if tableView == self.fakeTableView
@@ -378,6 +371,7 @@ class DynamicNewController < UIViewController
         cliente.nel_baule = 0
       end
       sender.nel_baule = cliente.nel_baule
+      "reload_clienti_and_views".post_notification(self, filtro:nil)
     end
 
     "bauleDidChange".post_notification
@@ -387,7 +381,7 @@ class DynamicNewController < UIViewController
   def tableView(tableView, didSelectRowAtIndexPath:indexPath)
 
     if tableView == self.searchDisplayController.searchResultsTableView 
-
+      puts "didSelectRowAtIndexPath"
       cell = tableView.cellForRowAtIndexPath indexPath
       cliente = self.fetchControllerForTableView(tableView).objectAtIndexPath(indexPath)
       
@@ -403,16 +397,11 @@ class DynamicNewController < UIViewController
         whichView.view.frame = self.view.frame
         self.setAlphaWhenViewDocked(whichView.view, alpha:0.0)
         @viewDocked = true
-
         nav = whichView.clientiVC.navigationController
         dvc = self.storyboard.instantiateViewControllerWithIdentifier("ClienteDetail")
         dvc.cliente = cliente
         dvc.titolo  = whichView.titolo
-
         whichView.clientiVC.scrollToClienteAndPush(cliente)
-
-        #nav.pushViewController(dvc, animated:true)
-
         self.searchDisplayController.setActive false
       end
     end

@@ -14,12 +14,12 @@ class UserAuthenticator
       password: password
     }
     
-    Store.shared.client.postPath("oauth/token?expires_in=10",
+    Store.shared.client.postPath("oauth/token",
                            parameters:params,
                               success:lambda do |operation, responseObject|
 
                                 token = responseObject.objectForKey "access_token"
-                                puts "token=#{token}"
+
                                 CredentialStore.default.token = token
                                 CredentialStore.default.username = username
                                 CredentialStore.default.password = password
@@ -28,7 +28,7 @@ class UserAuthenticator
                                 success.call
                               end,
                               failure:lambda do |operation, error|
-                                puts "failure login"
+                                NSLog "failure login"
                                 failure.call
                                 # if (operation.response.statusCode == 500)
                                 #    failure.call("Something went wrong!")

@@ -2,7 +2,7 @@ class AppuntoFormController < UITableViewController
 
   attr_accessor :appunto, :cliente, 
                 :presentedAsModal, :isNew, 
-                :saveBlock
+                :delegate
 
 
   def viewWillAppear(animated)
@@ -87,27 +87,22 @@ class AppuntoFormController < UITableViewController
 
   def save(sender)
 
-    if @appunto.isUpdated
-      @appunto.updated_at = Time.now
-    end
+    # if @appunto.isUpdated
+    #   @appunto.updated_at = Time.now
+    # end
+
+    @appunto.updated_at = Time.now
     
     Store.shared.save
     Store.shared.persist
-
-    if @appunto.remote_id == 0
-      @appunto.save_to_backend(nil, withNotification:"retrySave", success:nil, failure:nil)
-    end
     
     if presentedAsModal?
-
-      self.dismissViewControllerAnimated(true, completion:nil)
-      
-      # DataImporter.default.sync_appunti
-
-      # didChange = NSManagedObjectContextObjectsDidChangeNotification
-      # didChange.remove_observer(self, "changes:")
-      # didSave = NSManagedObjectContextDidSaveNotification
-      # didSave.remove_observer(self, "didSave:")
+      self.delegate.appuntoFormController(self, didSaveAppunto:@appunto)
+            
+      didChange = NSManagedObjectContextObjectsDidChangeNotification
+      didChange.remove_observer(self, "changes:")
+      didSave = NSManagedObjectContextDidSaveNotification
+      didSave.remove_observer(self, "didSave:")
     end
     
   end
@@ -116,28 +111,31 @@ class AppuntoFormController < UITableViewController
   def print_appunto
 
     data = { appunto_ids: ["#{@appunto.remote_id}"] }
-
-    AFMotion::Client.shared.setDefaultHeader("Accept", value:"application/pdf")
-    AFMotion::Client.shared.setDefaultHeader("Authorization", value: "Bearer #{Store.shared.token}")
     
-    AFMotion::Client.shared.put("/api/v1/appunti/print_multiple", data) do |result|
-      if result.success?
-        
-        resourceDocPath = NSString.alloc.initWithString(NSBundle.mainBundle.resourcePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent("Documents"))
-        filePath = resourceDocPath.stringByAppendingPathComponent("Sovrapacchi.pdf")
-        result.object.writeToFile(filePath, atomically:true)
-        url = NSURL.fileURLWithPath(filePath)
-        if (url) 
-          @documentInteractionController = UIDocumentInteractionController.interactionControllerWithURL(url)
-          @documentInteractionController.setDelegate(self)
-          @documentInteractionController.presentPreviewAnimated(true)
-        end
-      else
+    Store.shared.client.setDefaultHeader "Accept", value: "application/pdf"
+    Store.shared.client.setDefaultHeader "Authorization", value: "Bearer #{CredentialStore.default.token}"
+    Store.shared.client.putPath("/api/v1/appunti/print_multiple",
+                           parameters:data,
+                              success:lambda do |operation, responseObject|
 
-        App.alert("babbeo")
-      end
-    end
-    Store.shared.login {} 
+                                resourceDocPath = NSString.alloc.initWithString(NSBundle.mainBundle.resourcePath.stringByDeletingLastPathComponent.stringByAppendingPathComponent("Documents"))
+                                filePath = resourceDocPath.stringByAppendingPathComponent("Sovrapacchi.pdf")
+                                responseObject.writeToFile(filePath, atomically:true)
+                                
+                                url = NSURL.fileURLWithPath(filePath)
+                                if (url) 
+                                  @documentInteractionController = UIDocumentInteractionController.interactionControllerWithURL(url)
+                                  @documentInteractionController.setDelegate(self)
+                                  @documentInteractionController.presentPreviewAnimated(true)
+                                end
+                              end,
+                              failure:lambda do |operation, error|
+
+                                App.alert "#{error[0].localizedMessage}"
+
+                              end)
+    
+    Store.shared.client.setDefaultHeader "Accept", value: "application/json"
   end
 
 
@@ -318,15 +316,10 @@ class AppuntoFormController < UITableViewController
   def actionSheet(actionSheet, didDismissWithButtonIndex:buttonIndex)
     if buttonIndex != @actionSheet.cancelButtonIndex
 
-      cliente = @appunto.cliente
-      
-      @appunto.remove
-
-      if presentedAsModal?
-        self.dismissViewControllerAnimated(true, completion:nil)
+      cliente = @appunto.cliente      
+      @appunto.remove do
+        self.delegate.appuntoFormController(self, didSaveAppunto:@appunto)
       end
-
-      #self.delegate playerDetailsViewController:self didDeletePlayer:self.playerToEdit
     end
     @actionSheet = nil
   end

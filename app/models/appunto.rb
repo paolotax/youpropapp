@@ -113,15 +113,16 @@ class Appunto < NSManagedObject
   #   NSSet.setWithObject("created_at")
   # end
 
-  def remove
+  def remove(&callback)
 
+    puts "willRemove"
     # qui isNew? o isInserted mi da sempre false quando cancello un nuovo inserimento
     # uso lo 0 nell id ma non so
-    unless self.remote_id == 0
+    if remote_id != 0
 
-      if self.status == "da_fare"
+      if status == "da_fare" || status == "preparato"
         self.cliente.appunti_da_fare -= 1
-      elsif self.status == "in_sospeso"
+      elsif status == "in_sospeso"
         self.cliente.appunti_in_sospeso -= 1
       end
 
@@ -130,14 +131,16 @@ class Appunto < NSManagedObject
           Store.shared.context.deleteObject(self)
           Store.shared.save
           Store.shared.persist
+          callback.call
         else
-          puts "error"
+          App.alert("Inpossibile eliminare l'appunto. Riprova più tardi")
         end
       end
     else
       Store.shared.context.deleteObject(self)
       Store.shared.save
       Store.shared.persist
+      callback.call
     end
   end
 

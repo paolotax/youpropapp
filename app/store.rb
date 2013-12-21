@@ -5,55 +5,15 @@ class Store
   
   BASE_URL = "http://youpropa.com"
   #BASE_URL = "http://localhost:3000"
-
-  # USERNAME = 'polso'
-  # PASSWORD = 'polso14'
-  # USERNAME = 'paolotax'
-  # PASSWORD = 'sisboccia'
   
   #server 
   APP_ID = "36e1b9ed802dc7ee45e375bf318924dc3ae0f0f842c690611fde8336687960eb"
   SECRET = "11ab577f8fabf2ac33bdd75e951fc6507ef7bc21ef993c2a77a1383bed438224"
   
-  #ptax
-  #APP_ID = "9aa427dcda89ebd5b3c9015dcd507242b70bac2a4d6e736589f6be35849474ff"
-  #SECRET = "a5d78f0c32ba25fcbc1a679e03b110724497684263c1f4d9f645444cbf80a832"
-
   attr_accessor :token, :username, :password
 
 
 # login
-
-
-  # def login(&block)
-  #   data = {
-  #     grant_type: 'password',
-  #     client_id: APP_ID,
-  #     client_secret: SECRET,
-  #     username: @username,
-  #     password: @password
-  #   }
-  #   AFNetworkActivityIndicatorManager.sharedManager.enabled = true
-  #   AFMotion::Client.build_shared(BASE_URL) do
-  #     header "Accept", "application/json"
-
-  #     operation :json
-  #   end
-  #   AFMotion::Client.shared.post("oauth/token", data) do |result|
-  #     if result.success?
-
-  #       token = result.object['access_token']        
-  #       @token = token
-  #       self.client.setDefaultHeader("Authorization", value: "Bearer #{token}")
-
-  #       block.call
-  #     else
-  #       "errorLogin".post_notification
-  #       App.alert("Attenzione.\n Non riesco connettermi al server. \nPuoi comunque aggiornare i dati offline, il server dovrà essere aggiornato a manoni")
-  #     end
-  #   end
-  # end
-
 
   def login(&block)
     
@@ -68,33 +28,31 @@ class Store
     }
     
     self.client.postPath("oauth/token",
-                               parameters:data,
-                                  success:lambda do |operation, responseObject|
-                                    token = responseObject.objectForKey "access_token"
-                                    CredentialStore.default.token = token
-                                    SVProgressHUD.dismiss
-                                    set_token_header
-                                    block.call
-                                  end,
-                                       
-                                  failure:lambda do |operation, error|
+                         parameters:data,
+                            success:lambda do |operation, responseObject|
+                              token = responseObject.objectForKey "access_token"
+                              CredentialStore.default.token = token
+                              SVProgressHUD.dismiss
+                              set_token_header
+                              block.call
+                            end,
+                                 
+                            failure:lambda do |operation, error|
 
-                                    if operation.response
-                                      if (operation.response.statusCode == 500)
-                                        SVProgressHUD.showErrorWithStatus("Ooops! Something went wrong!")
-                                      else
-                                        jsonData = operation.responseString.dataUsingEncoding NSUTF8StringEncoding
-                                        json = NSJSONSerialization.JSONObjectWithData jsonData, options:0, error:nil
-                                        errorMessage = json.objectForKey "error"
-                                        SVProgressHUD.showErrorWithStatus errorMessage
-                                      end
-                                    else
-                                      SVProgressHUD.showErrorWithStatus("No Connection")
-                                    end
+                              if operation.response
+                                if (operation.response.statusCode == 500)
+                                  SVProgressHUD.showErrorWithStatus("Ooops! Something went wrong!")
+                                else
+                                  jsonData = operation.responseString.dataUsingEncoding NSUTF8StringEncoding
+                                  json = NSJSONSerialization.JSONObjectWithData jsonData, options:0, error:nil
+                                  errorMessage = json.objectForKey "error"
+                                  SVProgressHUD.showErrorWithStatus errorMessage
+                                end
+                              else
+                                SVProgressHUD.showErrorWithStatus("No Connection")
+                              end
 
-                                  end)
-  
-
+                            end)
   end
 
 
@@ -116,6 +74,11 @@ class Store
   end
 
 
+  def baseURL
+    BASE_URL
+  end
+
+
   def setupReachability
 
     client.reachabilityStatusChangeBlock = lambda do |status| 
@@ -124,6 +87,13 @@ class Store
         puts "Not reachable"
       else
         puts "Reachable"
+            DataImporter.default.sync_entity("Appunto",
+                success:lambda do
+                  
+                end,
+                failure:lambda do
+                  App.alert "Impossibile salvare dati sul server"
+                end) 
       end
 
       if status == AFNetworkReachabilityStatusReachableViaWiFi
@@ -152,7 +122,6 @@ class Store
 
   def isReachable?
     #@reachability.isReachable == true
-
     client.networkReachabilityStatus != AFNetworkReachabilityStatusNotReachable 
   end
 

@@ -19,6 +19,7 @@ class ClienteDetailController < UIViewController
     self.tableView.addSubview(@refreshControl)
 
     self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoAuto")
+
   end
 
 
@@ -90,6 +91,7 @@ class ClienteDetailController < UIViewController
       controller.cliente = cliente
       controller.isNew = true
       controller.presentedAsModal = true
+      controller.delegate = self
     
     elsif segue.identifier.isEqualToString("editAppunto")
       controller = segue.destinationViewController.topViewController
@@ -105,6 +107,7 @@ class ClienteDetailController < UIViewController
       controller.appunto = appunto
       controller.isNew = false
       controller.presentedAsModal = true
+      controller.delegate = self
     
     elsif segue.identifier.isEqualToString("showInSospeso")
       controller = segue.destinationViewController
@@ -121,6 +124,26 @@ class ClienteDetailController < UIViewController
 
     end
   end
+
+
+#pragma mark - AppuntoFormController delegate 
+  
+
+  def appuntoFormController(appuntoFormController, didSaveAppunto:appunto)
+
+    appuntoFormController.dismissViewControllerAnimated(true, completion:nil)
+    DataImporter.default.sync_entity("Appunto",
+                success:lambda do
+                  reload
+                end,
+                failure:lambda do
+                  App.alert "Impossibile salvare dati sul server"
+                end) 
+
+  end
+
+
+#pragma mark - TableView delegate
 
 
   def numberOfSectionsInTableView(tableView)
@@ -211,24 +234,18 @@ class ClienteDetailController < UIViewController
 
 
   def navigate(sender)
-
     placemark = MKPlacemark.alloc.initWithCoordinate(cliente.coordinate, addressDictionary:nil)
-
     mapItem = MKMapItem.alloc.initWithPlacemark(placemark)
-    
-    mapItem.name = cliente.nome
-    
+    mapItem.name = cliente.nome    
     mapItem.openInMapsWithLaunchOptions({ MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving })
-
-
-    # url = NSURL.URLWithString("http://maps.apple.com/maps?q=#{cliente.latitude},#{cliente.longitude}")
-    # UIApplication.sharedApplication.openURL(url);
   end  
+
 
   def makeCall(sender)
     url = NSURL.URLWithString("tel://#{cliente.telefono.split(" ").join}")
     UIApplication.sharedApplication.openURL(url);
   end  
+
 
   def sendEmail(sender)
     url = NSURL.URLWithString("mailto://#{cliente.email}")
@@ -241,9 +258,16 @@ class ClienteDetailController < UIViewController
     UIApplication.sharedApplication.openURL(url);
   end 
 
+
   private
 
+
     def loadFromBackend
+      if Store.shared.isReachable? == false
+        @refreshControl.endRefreshing unless @refreshControl.nil?
+        App.alert "Dispositivo non connesso alla rete. Riprova più tardi"
+        return
+      end
       params = { cliente: cliente.ClienteId }
       DataImporter.default.importa_appunti(params) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?

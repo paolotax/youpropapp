@@ -15,18 +15,6 @@ class LibriController < UIViewController
     #self.tableView.registerClass(LibroCell, forCellReuseIdentifier:"cellLibro")
   end
 
-  def viewWillAppear(animated)
-    super
-    reload
-  end
-
-  def viewWillDisappear(animated)
-    super
-  end
-
-  def viewDidAppear(animated)
-    super
-  end
 
   def reload
     Libro.reset
@@ -34,10 +22,10 @@ class LibriController < UIViewController
     self.tableView.reloadData
   end
 
+
   def close(sender)
     self.dismissViewControllerAnimated(true, completion:nil)
   end
-
 
 
   # Storyboard methods
@@ -69,6 +57,7 @@ class LibriController < UIViewController
       @controller
     end
   end
+
 
   def searchDisplayController(controller, shouldReloadTableForSearchString:searchString)
     @controller = nil
@@ -152,7 +141,12 @@ class LibriController < UIViewController
   private
 
 
-    def loadFromBackend
+    def loadFromBackend      
+      if Store.shared.isReachable? == false
+        @refreshControl.endRefreshing unless @refreshControl.nil?
+        App.alert "Dispositivo non connesso alla rete. Riprova più tardi"
+        return
+      end
       DataImporter.default.importa_libri(nil) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?
         if result.success?
