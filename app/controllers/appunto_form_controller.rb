@@ -5,14 +5,17 @@ class AppuntoFormController < UITableViewController
                 :delegate
 
 
-  def viewWillAppear(animated)
+  def viewDidLoad
     super
-
     didChange = NSManagedObjectContextObjectsDidChangeNotification
     didChange.add_observer(self, "changes:", Store.shared.context)
 
     didSave = NSManagedObjectContextDidSaveNotification
     didSave.add_observer(self, "didSave:", Store.shared.context)
+  end
+
+  def viewWillAppear(animated)
+    super
 
     if isNew? && !@appunto
       @appunto = Appunto.add do |a|
@@ -47,11 +50,8 @@ class AppuntoFormController < UITableViewController
 #pragma mark - Notifications
 
 
-  def changes(sender)
-    puts "---changes---"
-    puts sender.userInfo
-    puts Store.shared.stats
-        
+  def changes(sender) 
+    puts "---changes--- "       
     self.navigationItem.setRightBarButtonItem(UIBarButtonItem.alloc.initWithBarButtonSystemItem(UIBarButtonSystemItemDone, target:self, action:"save:"))
     self.navigationItem.setLeftBarButtonItem(UIBarButtonItem.alloc.initWithBarButtonSystemItem(UIBarButtonSystemItemCancel, target:self, action:"cancel:"))
   end
@@ -59,8 +59,6 @@ class AppuntoFormController < UITableViewController
 
   def didSave(sender)
     puts "---didSave--- "
-    sender.userInfo
-    puts Store.shared.stats
   end
 
 

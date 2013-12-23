@@ -9,8 +9,6 @@ class Store
   #server 
   APP_ID = "36e1b9ed802dc7ee45e375bf318924dc3ae0f0f842c690611fde8336687960eb"
   SECRET = "11ab577f8fabf2ac33bdd75e951fc6507ef7bc21ef993c2a77a1383bed438224"
-  
-  attr_accessor :token, :username, :password
 
 
 # login
@@ -18,18 +16,19 @@ class Store
   def login(&block)
     
     SVProgressHUD.show
-    
+
     data = {
       grant_type: 'password',
       client_id: APP_ID,
       client_secret: SECRET,
-      username: @username,
-      password: @password
+      username: CredentialStore.default.username,
+      password: CredentialStore.default.password
     }
     
     self.client.postPath("oauth/token",
                          parameters:data,
                             success:lambda do |operation, responseObject|
+                              puts "gino"
                               token = responseObject.objectForKey "access_token"
                               CredentialStore.default.token = token
                               SVProgressHUD.dismiss
@@ -38,7 +37,7 @@ class Store
                             end,
                                  
                             failure:lambda do |operation, error|
-
+                              puts "error gino"
                               if operation.response
                                 if (operation.response.statusCode == 500)
                                   SVProgressHUD.showErrorWithStatus("Ooops! Something went wrong!")
@@ -86,14 +85,14 @@ class Store
       if (status == AFNetworkReachabilityStatusNotReachable)
         puts "Not reachable"
       else
-        puts "Reachable"
-            DataImporter.default.sync_entity("Appunto",
-                success:lambda do
-                  
-                end,
-                failure:lambda do
-                  App.alert "Impossibile salvare dati sul server"
-                end) 
+        DataImporter.default.sync_entity("Appunto",
+            success:lambda do
+              "reload_clienti_and_views".post_notification(self, filtro: nil)
+              "reload_cliente".post_notification
+            end,
+            failure:lambda do
+              App.alert "Impossibile salvare dati sul server"
+            end) 
       end
 
       if status == AFNetworkReachabilityStatusReachableViaWiFi
@@ -167,7 +166,7 @@ class Store
     end
     
     # Clear caches, they will be reloaded on demand
-    # ManagedObjectClasses.each {|c| c.reset}
+    ManagedObjectClasses.each {|c| c.reset}
   end
 
   def clear
@@ -193,8 +192,8 @@ class Store
 
   def initialize
 
-    #url_cache = NSURLCache.alloc.initWithMemoryCapacity(4 * 1024 * 1024, diskCapacity:20 * 1024 * 1024, diskPath:nil)
-    #NSURLCache.setSharedURLCache(url_cache)
+    url_cache = NSURLCache.alloc.initWithMemoryCapacity(4 * 1024 * 1024, diskCapacity:20 * 1024 * 1024, diskPath:nil)
+    NSURLCache.setSharedURLCache(url_cache)
     
     @model ||= NSManagedObjectModel.alloc.init.tap do |m|
       m.entities = ManagedObjectClasses.collect {|c| c.entity}
@@ -231,7 +230,7 @@ class Store
     end
     
     @store.createManagedObjectContexts
-
+    
     @persistent_context = @store.persistentStoreManagedObjectContext
     @context = @store.mainQueueManagedObjectContext
 

@@ -11,3 +11,5 @@ TIPI_CLIENTI = ['Scuola Primaria', 'Istituto Comprensivo', 'Direzione Didattica'
 
 ABBR_TIPI    = ['E', 'IC', 'D', 'C', '', '', 'Com']
 
+TABLES = ["clienti", "appunti", "righe", "classi", "libri", "adozioni"]
+

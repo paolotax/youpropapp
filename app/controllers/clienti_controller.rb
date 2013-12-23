@@ -386,7 +386,7 @@ class ClientiController < UITableViewController
 
       if mode == KClientiMode
 
-        DataImporter.default.importa_clienti_bis(nil,
+        DataImporter.default.importa_clienti(nil,
                                  withNotification:"#{filtro}_retry_sync",
                                           success:lambda do
                                             @refreshControl.endRefreshing unless @refreshControl.nil?
@@ -399,7 +399,7 @@ class ClientiController < UITableViewController
                                           end)         
       else
 
-        DataImporter.default.importa_appunti_bis(nil,
+        DataImporter.default.importa_appunti(nil,
                                  withNotification:"#{filtro}_reload_clienti",
                                           success:lambda do
                                             @refreshControl.endRefreshing unless @refreshControl.nil?

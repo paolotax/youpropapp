@@ -53,8 +53,8 @@ class AppuntoCellAuto < UITableViewCell
       end
 
 
-      @imageCloud = UIImageView.alloc.initWithFrame(CGRectMake(5,5,15,15)).tap do |img|
-        #img.setTranslatesAutoresizingMaskIntoConstraints false
+      @imageCloud = UIImageView.alloc.initWithFrame(CGRectZero).tap do |img|
+        img.setTranslatesAutoresizingMaskIntoConstraints false
         cell.contentView.addSubview(img)
       end
         
@@ -282,43 +282,43 @@ class AppuntoCellAuto < UITableViewCell
                                       multiplier:1.0,
                                       constant:0))
 
-    #### @imageCloud
+    ### @imageCloud
 
-    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
-    #                                       @imageCloud,
-    #                                   attribute:NSLayoutAttributeTrailing,
-    #                                   relatedBy:NSLayoutRelationEqual,
-    #                                   toItem:self.contentView,
-    #                                   attribute:NSLayoutAttributeTrailing,
-    #                                   multiplier:1.0,
-    #                                   constant:15.0))
+    self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+                                          @imageCloud,
+                                      attribute:NSLayoutAttributeLeading,
+                                      relatedBy:NSLayoutRelationEqual,
+                                      toItem:self.contentView,
+                                      attribute:NSLayoutAttributeLeading,
+                                      multiplier:1.0,
+                                      constant:15.0))
     
-    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
-    #                                       @imageCloud,
-    #                                   attribute:NSLayoutAttributeTop,
-    #                                   relatedBy:NSLayoutRelationEqual,
-    #                                   toItem:self.contentView,
-    #                                   attribute:NSLayoutAttributeTop,
-    #                                   multiplier:1.0,
-    #                                   constant:10))
+    self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+                                          @imageCloud,
+                                      attribute:NSLayoutAttributeTop,
+                                      relatedBy:NSLayoutRelationEqual,
+                                      toItem:self.contentView,
+                                      attribute:NSLayoutAttributeTop,
+                                      multiplier:1.0,
+                                      constant:10))
    
-    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
-    #                                         @imageCloud,
-    #                                   attribute:NSLayoutAttributeWidth,
-    #                                   relatedBy:NSLayoutRelationEqual,
-    #                                   toItem:@imageCloud,
-    #                                   attribute:NSLayoutAttributeWidth,
-    #                                   multiplier:1.0,
-    #                                   constant:0))
+    self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+                                            @imageCloud,
+                                      attribute:NSLayoutAttributeWidth,
+                                      relatedBy:NSLayoutRelationEqual,
+                                      toItem:@imageCloud,
+                                      attribute:NSLayoutAttributeWidth,
+                                      multiplier:1.0,
+                                      constant:0))
     
-    # self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
-    #                                        @imageCloud,
-    #                                   attribute:NSLayoutAttributeHeight,
-    #                                   relatedBy:NSLayoutRelationEqual,
-    #                                   toItem:@imageCloud,
-    #                                   attribute:NSLayoutAttributeHeight,
-    #                                   multiplier:1.0,
-    #                                   constant:0))
+    self.contentView.addConstraint( NSLayoutConstraint.constraintWithItem(
+                                           @imageCloud,
+                                      attribute:NSLayoutAttributeHeight,
+                                      relatedBy:NSLayoutRelationEqual,
+                                      toItem:@imageCloud,
+                                      attribute:NSLayoutAttributeHeight,
+                                      multiplier:1.0,
+                                      constant:0))
 
     @didSetupConstraints = true
 

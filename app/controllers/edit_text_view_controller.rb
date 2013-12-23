@@ -60,6 +60,14 @@ class EditTextViewController < UIViewController
     self.navigationController.popViewControllerAnimated(true)
   end
 
+
+  def stepperValueChanged(sender)
+    value = sender.value
+    self.textField.text = "#{value.to_i}"
+  end
+
+
+
   #pragma mark - UITextFieldDelegate
 
   def textFieldShouldReturn(textField)

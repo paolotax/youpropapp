@@ -32,8 +32,8 @@ class DataImporter
 
 
   # importa_...  I love metaprogramming
-  # da eliminare 
-  ["clienti", "appunti", "righe", "classi", "libri", "adozioni"].each do |table|
+  # da eliminare il primo metodo
+  TABLES.each do |table|
 
     define_method("importa_#{table}:") do |parameters, &callback|
 
@@ -52,12 +52,8 @@ class DataImporter
                                                 end)
       end
     end
-  end
-
-
-  ["clienti", "appunti", "righe", "classi", "libri", "adozioni"].each do |table|
         
-    define_method("importa_#{table}_bis:withNotification:success:failure:") do |parameters, notification, success, failure|
+    define_method("importa_#{table}:withNotification:success:failure:") do |parameters, notification, success, failure|
 
       processSuccessBlock = lambda do
         success.call
@@ -162,7 +158,7 @@ class DataImporter
       end
 
       params = { updated_at: last_sync_date }
-      DataImporter.default.importa_appunti_bis(params,
+      DataImporter.default.importa_appunti(params,
                          withNotification:nil,
                                   success:lambda do
                                     userDefaults = NSUserDefaults.standardUserDefaults.setObject Time.now, forKey:"last_appunti_sync"

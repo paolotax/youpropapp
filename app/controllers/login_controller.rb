@@ -44,7 +44,6 @@ class LoginController < Formotion::FormController
 
   def login
     [:username, :password].each { |prop|
-      Store.shared.send(prop.to_s + "=", form.render[prop])
       CredentialStore.default.send(prop.to_s + "=", form.render[prop])
     }
     self.navigationController.dismissModalViewControllerAnimated(true)

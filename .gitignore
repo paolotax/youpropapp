@@ -12,6 +12,7 @@ ib.xcodeproj/*
 .DS_Store
 
 vendor/Pods/*
+vendor/Pods/.build/*
 
 nbproject
 .redcar

@@ -20,6 +20,7 @@ class ClienteDetailController < UIViewController
 
     self.tableView.registerClass(AppuntoCellAuto, forCellReuseIdentifier:"cellAppuntoAuto")
 
+    "reload_cliente".add_observer(self, "reload")
   end
 
 
@@ -34,6 +35,7 @@ class ClienteDetailController < UIViewController
 
   def viewWillDisappear(animated)
     super
+
     contentSizeChange = UIContentSizeCategoryDidChangeNotification
     contentSizeChange.remove_observer(self, "contentSizeCategoryChanged:")
   end
@@ -42,6 +44,7 @@ class ClienteDetailController < UIViewController
   def contentSizeCategoryChanged(notification)
     self.tableView.reloadData
   end
+
 
   def reload
     @sorted_appunti = nil

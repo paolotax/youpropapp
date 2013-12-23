@@ -1,13 +1,13 @@
 class Appunto < NSManagedObject
 
 
-  attr_accessor :primitiveData, :setPrimitiveCreatedAt
-
   @sortKeys   = ['cliente.provincia', 'cliente.comune', 'cliente.nome']
   @sortOrders = [true, true, true]
+
   
   @sectionKey = "cliente.provincia_e_comune"
   @searchKey  = ["cliente_nome", "destinatario", "note", "cliente.comune", "cliente.frazione"]
+
 
   @attributes = [
     { name: 'remote_id',    type: NSInteger32AttributeType, default: nil,   optional: true, transient: false, indexed: false},
@@ -27,44 +27,12 @@ class Appunto < NSManagedObject
     { name: 'uuid',           type: NSStringAttributeType,  default: nil,  optional: true, transient: false, indexed: false}
   ]
 
+
   @relationships = [
     { name: 'cliente', destination: 'Cliente', inverse: 'appunti' },
     { name: 'righe',   destination: 'Riga', inverse: 'appunto', json: 'righe', optional: true, transient: false, indexed: false, ordered: true, min: 0, max: NSIntegerMax, del: NSCascadeDeleteRule }
   ]
 
-  @sections = [
-    [nil, ['Destinatario', 'destinatario', :text, 'Stato', 'status', :text]],
-    ['Note', ['Note', 'note', :longtext]]
-  ]
-
-
-  def self.load
-    
-    super
-    NSNotificationCenter.defaultCenter.addObserver(self.class,
-                                              selector:"objectContextWillSave:",
-                                                    name: NSManagedObjectContextWillSaveNotification,
-                                                  object: nil)
-
-  end
-
-  def self.objectContextWillSave(notification)
-
-
-   context = notification.object
-
-   puts context
-   # allModified = context.insertedObjects.setByAddingObjectsFromSet(context.updatedObjects)
-   # predicate = NSPredicate.predicateWithFormat("self isKindOfClass: %@", self.class)
-   # modifiable = allModified.filteredSetUsingPredicate(predicate)
-   # modifiable.makeObjectsPerformSelector("setLastModified:", withObject: NSDate.date)
- end
-
-
-
-  def data        
-    #  "#{(self.created_at.year * 10000) + (self.created_at.month * 100) + self.created_at.day}"
-  end
 
   def note_e_righe
     note_e_righe = ""
@@ -77,6 +45,7 @@ class Appunto < NSManagedObject
     note_e_righe    
   end
 
+
   def calcola_importo
     importi = [0]
     self.righe.each do |r|
@@ -84,6 +53,7 @@ class Appunto < NSManagedObject
     end    
     importi.reduce(:+).round(2)
   end
+
 
   def calcola_copie
     copie = [0]
@@ -93,39 +63,10 @@ class Appunto < NSManagedObject
     copie.reduce(:+)
   end
 
-  # #pragma mark -
-  # #pragma mark Time stamp setter
-
-  # def created_at=(newDate)
-      
-  #   self.willChangeValueForKey("created_at")
-  #   @primitiveCreatedAt = newDate
-  #   self.didChangeValueForKey("created_at")
-    
-  #   @primitiveData = nil
-  # end
-
-
-  # #pragma mark -
-  # #pragma mark Key path dependencies
-
-  # def self.keyPathsForValuesAffectingSectionIdentifier
-  #   NSSet.setWithObject("created_at")
-  # end
 
   def remove(&callback)
-
     puts "willRemove"
-    # qui isNew? o isInserted mi da sempre false quando cancello un nuovo inserimento
-    # uso lo 0 nell id ma non so
     if remote_id != 0
-
-      if status == "da_fare" || status == "preparato"
-        self.cliente.appunti_da_fare -= 1
-      elsif status == "in_sospeso"
-        self.cliente.appunti_in_sospeso -= 1
-      end
-
       remove_from_backend do |result|
         if result.success?
           Store.shared.context.deleteObject(self)
@@ -142,32 +83,6 @@ class Appunto < NSManagedObject
       Store.shared.persist
       callback.call
     end
-  end
-
-  def isNew? 
-    vals = self.committedValuesForKeys(nil)
-    return vals.count == 0
-  end
-
-  def self.filtra_status(status)
-  
-    request = NSFetchRequest.alloc.init
-    request.entity = NSEntityDescription.entityForName(name, inManagedObjectContext:Store.shared.context)
-
-    predicates = []
-    predicates.addObject(NSPredicate.predicateWithFormat("status contains[cd] %@", argumentArray:[status]))
-    request.predicate = NSCompoundPredicate.orPredicateWithSubpredicates(predicates)
-
-    request.sortDescriptors = ["updated_at"].collect { |sortKey|
-      NSSortDescriptor.alloc.initWithKey(sortKey, ascending:false)
-    }
-
-    error_ptr = Pointer.new(:object)
-    data = Store.shared.context.executeFetchRequest(request, error:error_ptr)
-    if data == nil
-      raise "Error when fetching data: #{error_ptr[0].description}"
-    end
-    data
   end
 
 

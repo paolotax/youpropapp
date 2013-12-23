@@ -1194,6 +1194,7 @@
 @end
 
 @interface AppuntoFormController: UITableViewController
+-(IBAction) viewDidLoad;
 -(IBAction) viewWillAppear:(id) animated;
 -(IBAction) changes:(id) sender;
 -(IBAction) didSave:(id) sender;
@@ -1242,6 +1243,9 @@
 -(IBAction) viewWillDisappear:(id) animated;
 -(IBAction) contentSizeCategoryChanged:(id) notification;
 -(IBAction) reload;
+-(IBAction) loadProvince;
+-(IBAction) reloadBackend;
+-(IBAction) fetchProvince:(id) scope;
 -(IBAction) changeMode:(id) sender;
 -(IBAction) changeProvincia:(id) sender;
 -(IBAction) scrollToClienteAndPush:(id) cliente;
@@ -1272,6 +1276,7 @@
 @property IBOutlet id fakeTableView;
 
 -(IBAction) viewDidLoad;
+-(IBAction) reload_details:(id) sender;
 -(IBAction) handleTap:(id) gesture;
 -(IBAction) handlePan:(id) gesture;
 -(IBAction) itemBehaviourForView:(id) view;
@@ -1291,6 +1296,7 @@
 @property IBOutlet id fakeTableView;
 
 -(IBAction) viewDidLoad;
+-(IBAction) reload_details:(id) notification;
 -(IBAction) handleTap:(id) gesture;
 -(IBAction) handlePan:(id) gesture;
 -(IBAction) itemBehaviourForView:(id) view;
@@ -1380,6 +1386,7 @@
 -(IBAction) handleTextCompletion;
 -(IBAction) done:(id) sender;
 -(IBAction) cancel:(id) sender;
+-(IBAction) stepperValueChanged:(id) sender;
 -(IBAction) textFieldShouldReturn:(id) textField;
 
 @end
@@ -1389,9 +1396,6 @@
 @property IBOutlet id tableView;
 
 -(IBAction) viewDidLoad;
--(IBAction) viewWillAppear:(id) animated;
--(IBAction) viewWillDisappear:(id) animated;
--(IBAction) viewDidAppear:(id) animated;
 -(IBAction) reload;
 -(IBAction) close:(id) sender;
 -(IBAction) fetchControllerForTableView:(id) tableView;
@@ -1523,7 +1527,6 @@
 
 @interface DataImporter
 -(IBAction) errorMessageForResponse:(id) operation;
--(IBAction) sync_appunti;
 
 @end
 
@@ -1557,7 +1560,6 @@
 @end
 
 @interface NSManagedObject
--(IBAction) refresh_backend;
 -(IBAction) update;
 -(IBAction) remove;
 -(IBAction) persist;
@@ -1676,11 +1678,9 @@
 @end
 
 @interface Appunto: NSManagedObject
--(IBAction) data;
 -(IBAction) note_e_righe;
 -(IBAction) calcola_importo;
 -(IBAction) calcola_copie;
--(IBAction) remove;
 
 @end
 
@@ -1700,7 +1700,6 @@
 -(IBAction) title;
 -(IBAction) coordinate;
 -(IBAction) mapItem;
--(IBAction) sum_copie;
 
 @end
 
@@ -1731,6 +1730,7 @@
 -(IBAction) set_token_header;
 -(IBAction) token_changed:(id) notification;
 -(IBAction) client;
+-(IBAction) baseURL;
 -(IBAction) setupReachability;
 -(IBAction) context;
 -(IBAction) persistent_context;
