@@ -1,8 +1,13 @@
 class MappingProvider  
 
   def self.shared
-    # Our store is a singleton object.
-    @shared ||= MappingProvider.new
+    @shared ||= begin
+      MappingProvider.new
+    end
+  end
+
+  def store=(store)
+    @store = store
   end
 
   def init_mappings(store, backend)
@@ -18,7 +23,7 @@ class MappingProvider
     add_response_mapping(cliente_mapping, "cliente")
     add_response_mapping(cliente_mapping, "clienti")
     add_request_mapping(request_cliente_mapping.inverseMapping, "cliente", Cliente)
-    add_route_set(Cliente, "api/v1/clienti", "api/v1/clienti/:ClienteId")
+    add_route_set(Cliente, "api/v1/clienti", "api/v1/clienti/:remote_id")
 
     add_response_mapping(appunto_mapping, "appunto")
     add_response_mapping(appunto_mapping, "appunti")
@@ -56,13 +61,15 @@ class MappingProvider
     @backend.addResponseDescriptor(descriptor)
   end
 
+  
   def add_request_mapping(mapping, path, klass)
     request_descriptor = RKRequestDescriptor.requestDescriptorWithMapping(mapping,
-                                                                          objectClass: klass,
-                                                                          rootKeyPath: path)
+                                                                    objectClass: klass,
+                                                                    rootKeyPath: path)
     @backend.addRequestDescriptor(request_descriptor)
   end
 
+  
   def add_route_set(klass, collection_path, resource_path)
     get_route = RKRoute.routeWithClass(klass, 
                                        pathPattern: resource_path,
@@ -86,6 +93,7 @@ class MappingProvider
 
   # Mappings
 
+
   def libro_mapping
     @libro_mapping ||= begin
       mapping = RKEntityMapping.mappingForEntityForName("Libro",
@@ -99,7 +107,9 @@ class MappingProvider
                                                  cm: "cm",
                                                  prezzo_copertina: "prezzo_copertina",
                                                  prezzo_consigliato: "prezzo_consigliato",
-                                                 image_url: "image_url"
+                                                 image_url: "image_url",
+                                                 created_at: "created_at",
+                                                 updated_at: "updated_at"
                                                 )
     end
   end
@@ -125,8 +135,7 @@ class MappingProvider
       mapping = RKEntityMapping.mappingForEntityForName("Cliente",
                                        inManagedObjectStore:@store)
       mapping.identificationAttributes = [ "uuid" ]
-      mapping.addAttributeMappingsFromDictionary(id: "ClienteId",
-
+      mapping.addAttributeMappingsFromDictionary(id: "remote_id",
                                                uuid: "uuid",
                                              titolo: "nome",
                                              comune: "comune",
@@ -145,7 +154,10 @@ class MappingProvider
                                     appunti_da_fare: "appunti_da_fare",
                                  appunti_in_sospeso: "appunti_in_sospeso",
                                           nel_baule: "nel_baule",
-                                              fatto: "fatto"
+                                              fatto: "fatto",
+                                                 created_at: "created_at",
+                                                 updated_at: "updated_at",
+                                                 deleted_at: "deleted_at"
                                                  )
       # mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("appunti", 
       #                                 toKeyPath:"appunti", withMapping:appunto_mapping))
@@ -177,7 +189,8 @@ class MappingProvider
                                     ragione_sociale: "ragione_sociale",
                                         partita_iva: "partita_iva",
                                      codice_fiscale: "codice_fiscale",
-                                          nel_baule: "nel_baule"
+                                          nel_baule: "nel_baule",
+                                         deleted_at: "deleted_at"
                                                  )
     end
   end
@@ -194,15 +207,15 @@ class MappingProvider
                                                  note: "note",
                                                  status: "status",
                                                  telefono: "telefono",
-                                                 cliente_id: "ClienteId",
+                                                 cliente_id: "cliente_id",
                                                  created_at: "created_at",
                                                  updated_at: "updated_at",
+                                                 deleted_at: "deleted_at",
                                                  totale_copie: "totale_copie",
                                                  totale_importo: "totale_importo",
                                                  cliente_nome: "cliente_nome"
                                                  )
-      mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("cliente", 
-                                     toKeyPath:"cliente", withMapping:cliente_mapping))
+      mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("cliente", toKeyPath:"cliente", withMapping:cliente_mapping))
 
       mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("righe", toKeyPath:"righe", withMapping:riga_mapping))
     end 
@@ -216,8 +229,9 @@ class MappingProvider
                                                  note: "note",
                                                  status: "status",
                                                  telefono: "telefono",
+                                                 deleted_at: "deleted_at",
                                                  email: "email",
-                                                 cliente_id: "ClienteId")
+                                                 cliente_id: "cliente_id")
       mapping.addPropertyMapping(RKRelationshipMapping.relationshipMappingFromKeyPath("righe_attributes", toKeyPath:"righe", withMapping:request_riga_mapping))
     end
   end

@@ -75,7 +75,7 @@ class NSManagedObject
 
     successBlock = lambda do |operation, responseObject|
       result = DataImporterResult.new(operation, responseObject, nil)
-      NSLog "Postato #{self.remote_id}"
+      NSLog "Postato #{self.entity.managedObjectClassName} #{self.remote_id}"
       processSuccessBlock.call
     end
 

@@ -168,6 +168,8 @@ class ClientiController < UITableViewController
       else
         cliente.nel_baule = 0
       end
+      cliente.updated_at = Time.now
+      puts "cliente"
       sender.nel_baule = cliente.nel_baule
     end
     Store.shared.save
@@ -345,8 +347,7 @@ class ClientiController < UITableViewController
   def appuntoFormController(appuntoFormController, didSaveAppunto:appunto)
 
     appuntoFormController.dismissViewControllerAnimated(true, completion:nil)
-    DataImporter.default.sync_entity("Appunto",
-                          success:lambda do
+    DataImporter.default.synchronize(lambda do
                             reload
                           end,
                           failure:lambda do

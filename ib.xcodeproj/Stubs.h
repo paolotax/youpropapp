@@ -1169,6 +1169,11 @@
 @interface AppDelegate
 -(IBAction) window;
 -(IBAction) initAppearance;
+-(IBAction) applicationWillEnterForeground:(id) application;
+-(IBAction) applicationDidEnterBackground:(id) application;
+-(IBAction) applicationDidBecomeActive:(id) application;
+-(IBAction) applicationWillTerminate:(id) application;
+-(IBAction) saveContext;
 
 @end
 

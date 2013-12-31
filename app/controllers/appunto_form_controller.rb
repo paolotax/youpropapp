@@ -21,7 +21,7 @@ class AppuntoFormController < UITableViewController
       @appunto = Appunto.add do |a|
         a.uuid = BubbleWrap.create_uuid.downcase
         a.cliente = cliente
-        a.ClienteId = cliente.ClienteId
+        a.cliente_id = cliente.remote_id
         a.cliente_nome = cliente.nome
         a.destinatario = ""
         a.status = "da_fare"
@@ -297,7 +297,6 @@ class AppuntoFormController < UITableViewController
                                           otherButtonTitles:nil)
 
       @actionSheet.showFromRect(cell.frame, inView:self.view, animated:true)
-      #appunto.remove
     
     elsif indexPath.section == 2
       cell = tableView.cellForRowAtIndexPath(indexPath)
@@ -313,11 +312,12 @@ class AppuntoFormController < UITableViewController
 
   def actionSheet(actionSheet, didDismissWithButtonIndex:buttonIndex)
     if buttonIndex != @actionSheet.cancelButtonIndex
+      
+      @appunto.deleted_at = @appunto.updated_at = Time.now
+      Store.shared.save
+      Store.shared.persist
+      self.delegate.appuntoFormController(self, didSaveAppunto:@appunto)
 
-      cliente = @appunto.cliente      
-      @appunto.remove do
-        self.delegate.appuntoFormController(self, didSaveAppunto:@appunto)
-      end
     end
     @actionSheet = nil
   end

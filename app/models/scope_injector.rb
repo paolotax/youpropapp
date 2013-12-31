@@ -71,12 +71,17 @@ class ScopeInjector
 
     elsif name == "appunti_tutti"
 
-      request.sortDescriptors = ["updated_at"].collect { |sortKey|
+      predicates.addObject(NSPredicate.predicateWithFormat("deleted_at = nil"))
+      pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
+      request.predicate = pred
+
+      request.sortDescriptors = ["created_at"].collect { |sortKey|
         NSSortDescriptor.alloc.initWithKey(sortKey, ascending:false)
       }
  
     elsif name == "appunti_nel_baule"
 
+      predicates.addObject(NSPredicate.predicateWithFormat("deleted_at = nil"))
       predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule = 1"))
       predicates.addObject(NSPredicate.predicateWithFormat("status != 'completato'"))
       pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
@@ -88,6 +93,7 @@ class ScopeInjector
 
     elsif name == "appunti_in_sospeso"
 
+      predicates.addObject(NSPredicate.predicateWithFormat("deleted_at = nil"))
       predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule != 1"))
       predicates.addObject(NSPredicate.predicateWithFormat("status = 'in_sospeso'"))
       pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
@@ -99,6 +105,7 @@ class ScopeInjector
 
     elsif name == "appunti_da_fare"
 
+      predicates.addObject(NSPredicate.predicateWithFormat("deleted_at = nil"))
       predicates.addObject(NSPredicate.predicateWithFormat("cliente.nel_baule != 1"))
       predicates.addObject(NSPredicate.predicateWithFormat("status != 'in_sospeso' and status != 'completato'"))
       pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)

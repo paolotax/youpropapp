@@ -80,13 +80,15 @@ class Store
 
   def setupReachability
 
+    client.operationQueue.maxConcurrentOperationCount = 1
+    client.operationQueue.suspended = true
     client.reachabilityStatusChangeBlock = lambda do |status| 
-      #client.operationQueue.suspended = false
       if (status == AFNetworkReachabilityStatusNotReachable)
         puts "Not reachable"
       else
-        DataImporter.default.sync_entity("Appunto",
-            success:lambda do
+        client.operationQueue.suspended = false
+        DataImporter.default.synchronize( 
+            lambda do
               "reload_clienti_and_views".post_notification(self, filtro: nil)
               "reload_cliente".post_notification
             end,

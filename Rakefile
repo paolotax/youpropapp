@@ -17,7 +17,7 @@ Motion::Project::App.setup do |app|
   app.testflight.api_token = '4e21427afeec172a9cedd0a7497f07e6_MTM5Nzc5NjIwMTMtMTAtMjQgMTU6NDU6MDYuMDg3NjQ3'
   app.testflight.team_token = '4d2966676a3fe25f3d318c7ee1ed0685_MjkwNzQ0MjAxMy0xMi0wNSAwMjoyOTo1OC45MzQyNTQ'
 
-  app.provisioning_profile = '/Users/paolotax/Library/MobileDevice/Provisioning Profiles/58A8231D-46DF-4CA2-AA65-1693F1770193.mobileprovision'   
+  app.provisioning_profile = '/Users/paolotax/Library/MobileDevice/Provisioning Profiles/4E9FFB4B-DEBF-4264-9C8D-815106B7FFDA.mobileprovision'   
   app.codesign_certificate = 'iPhone Developer: Paolo Tassinari (9L6JUZD52Q)' 
 
   app.device_family = [:iphone, :ipad]

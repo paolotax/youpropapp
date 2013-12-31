@@ -55,7 +55,7 @@ class Adozione < NSManagedObject
     pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
     request.predicate = pred
 
-    request.sortDescriptors = ["remote_libro_id", "classe.cliente.ClienteId", "classe.num_classe", "classe.sezione"].collect { |sortKey|
+    request.sortDescriptors = ["remote_libro_id", "classe.cliente.remote_id", "classe.num_classe", "classe.sezione"].collect { |sortKey|
       NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
     }
     
@@ -79,7 +79,7 @@ class Adozione < NSManagedObject
     pred = NSCompoundPredicate.andPredicateWithSubpredicates(predicates)
     request.predicate = pred
 
-    # request.sortDescriptors = ["remote_libro_id", "classe.cliente.ClienteId", "classe.num_classe", "classe.sezione"].collect { |sortKey|
+    # request.sortDescriptors = ["remote_libro_id", "classe.cliente.remote_id", "classe.num_classe", "classe.sezione"].collect { |sortKey|
     #   NSSortDescriptor.alloc.initWithKey(sortKey, ascending:true)
     # }
     

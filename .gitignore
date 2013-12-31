@@ -11,8 +11,8 @@ ib.xcodeproj/*
 
 .DS_Store
 
-vendor/Pods/*
-vendor/Pods/.build/*
+vendor/Pods
+vendor/Pods
 
 nbproject
 .redcar

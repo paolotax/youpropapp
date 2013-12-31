@@ -9,7 +9,7 @@ class Cliente < NSManagedObject
   @searchKey  = ['nome', 'comune', 'frazione']
 
   @attributes = [
-    { name: 'ClienteId', type: NSInteger32AttributeType, default: nil, optional: true, transient: false, indexed: false},
+    { name: 'remote_id', type: NSInteger32AttributeType, default: nil, optional: true, transient: false, indexed: false},
     { name: 'nome',      type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
     { name: 'comune',    type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
     { name: 'frazione',  type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
@@ -29,7 +29,10 @@ class Cliente < NSManagedObject
     { name: 'nel_baule',          type: NSBooleanAttributeType, default: 0, optional: true, transient: false, indexed: false},
     { name: 'fatto',              type: NSBooleanAttributeType, default: 0, optional: true, transient: false, indexed: false},
     { name: 'provincia_e_comune', type: NSStringAttributeType,  default: nil, optional: true, transient: true,  indexed: false},
-    { name: 'uuid',              type: NSStringAttributeType,    default: nil,  optional: true, transient: false, indexed: false} 
+    { name: 'uuid',              type: NSStringAttributeType,    default: nil,  optional: true, transient: false, indexed: false},
+    { name: 'created_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'updated_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'deleted_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false} 
   ]
 
   @relationships = [
@@ -45,7 +48,7 @@ class Cliente < NSManagedObject
   end
 
   def save_to_backend
-    if self.ClienteId == 0  
+    if self.remote_id == 0  
       Store.shared.backend.postObject(self, path:nil, parameters:nil, 
                           success:lambda do |operation, result|
                                     Store.shared.persist

@@ -370,6 +370,7 @@ class DynamicNewController < UIViewController
       else
         cliente.nel_baule = 0
       end
+      cliente.updated_at = Time.now
       sender.nel_baule = cliente.nel_baule
       "reload_clienti_and_views".post_notification(self, filtro:nil)
     end

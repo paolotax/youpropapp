@@ -57,24 +57,29 @@ class ClienteDetailController < UIViewController
 
   def appunti_da_fare
     @appunti_da_fare ||= begin
-      @appunti_da_fare = []
-      @appunti_da_fare = sorted_appunti.select { |a| a.status != "completato" && a.status != "in_sospeso" }
+      predicate = NSPredicate.predicateWithFormat("deleted_at == nil && status != 'completato' && status != 'in_sospeso'")
+      @appunti_da_fare =  sorted_appunti.filteredArrayUsingPredicate(predicate)
+      
+      # ruby style
+      # @appunti_da_fare = []
+      # @appunti_da_fare = sorted_appunti.select { |a| a.status != "completato" && a.status != "in_sospeso" }
+      
       @appunti_da_fare
     end
   end
 
   def appunti_in_sospeso
     @appunti_in_sospeso ||= begin
-      @appunti_in_sospeso = [] 
-      @appunti_in_sospeso = sorted_appunti.select { |a| a.status == "in_sospeso" }
+      predicate = NSPredicate.predicateWithFormat("deleted_at == nil && status == 'in_sospeso'")
+      @appunti_in_sospeso =  sorted_appunti.filteredArrayUsingPredicate(predicate)
       @appunti_in_sospeso
     end
   end
 
   def appunti_completati
     @appunti_completati ||= begin
-      @appunti_completati = [] 
-      @appunti_completati = sorted_appunti.select { |a| a.status == "completato" }
+      predicate = NSPredicate.predicateWithFormat("deleted_at == nil && status == 'completato'")
+      @appunti_completati =  sorted_appunti.filteredArrayUsingPredicate(predicate)
       @appunti_completati
     end
   end
@@ -135,8 +140,7 @@ class ClienteDetailController < UIViewController
   def appuntoFormController(appuntoFormController, didSaveAppunto:appunto)
 
     appuntoFormController.dismissViewControllerAnimated(true, completion:nil)
-    DataImporter.default.sync_entity("Appunto",
-                success:lambda do
+    DataImporter.default.synchronize(lambda do
                   reload
                 end,
                 failure:lambda do
@@ -257,7 +261,7 @@ class ClienteDetailController < UIViewController
 
   
   def goToSite(sender)
-    url = NSURL.URLWithString("http://youpropa.com/clienti/#{cliente.ClienteId}")
+    url = NSURL.URLWithString("http://youpropa.com/clienti/#{cliente.remote_id}")
     UIApplication.sharedApplication.openURL(url);
   end 
 
@@ -271,7 +275,7 @@ class ClienteDetailController < UIViewController
         App.alert "Dispositivo non connesso alla rete. Riprova più tardi"
         return
       end
-      params = { cliente: cliente.ClienteId }
+      params = { cliente: cliente.remote_id }
       DataImporter.default.importa_appunti(params) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?
         if result.success?

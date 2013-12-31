@@ -16,7 +16,11 @@ class Libro < NSManagedObject
     { name: 'settore', type: NSStringAttributeType,    default: '', optional: true, transient: false, indexed: false},
     { name: 'image_url', type: NSStringAttributeType,    default: '', optional: true, transient: false, indexed: false},
     { name: 'prezzo_copertina',   type: NSDecimalAttributeType, default: 0.0, optional: true, transient: false, indexed: false},
-    { name: 'prezzo_consigliato', type: NSDecimalAttributeType, default: 0.0, optional: true, transient: false, indexed: false}
+    { name: 'prezzo_consigliato', type: NSDecimalAttributeType, default: 0.0, optional: true, transient: false, indexed: false},
+
+    { name: 'created_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'updated_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'deleted_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false}
   ]
 
   @relationships = [

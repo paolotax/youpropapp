@@ -122,7 +122,7 @@ class AppuntiController < UITableViewController
         return
       end
       
-      params = { cliente: cliente.ClienteId }
+      params = { cliente: cliente.remote_id }
       DataImporter.default.importa_appunti(params) do |result|
         @refreshControl.endRefreshing unless @refreshControl.nil?
         if result.success?

@@ -25,10 +25,13 @@ class AppDelegate
     end
     @window.makeKeyAndVisible
 
-    @login = LoginController.alloc.init
-    @login_navigation = UINavigationController.alloc.initWithRootViewController(@login)
+    
+    if CredentialStore.default.token.blank?
+      @login = LoginController.alloc.init
+      @login_navigation = UINavigationController.alloc.initWithRootViewController(@login)
 
-    @window.rootViewController.presentModalViewController(@login_navigation, animated:false)
+      @window.rootViewController.presentModalViewController(@login_navigation, animated:false)
+    end
     
     true
   end
@@ -58,14 +61,15 @@ class AppDelegate
   end 
 
   def applicationDidBecomeActive(application)
-    DataImporter.default.sync_entity("Appunto",
-        success:lambda do
-          "reload_clienti_and_views".post_notification(self, filtro: nil)
-          "reload_cliente".post_notification
-        end,
-        failure:lambda do
-          App.alert "Impossibile salvare dati sul server"
-        end) 
+    DataImporter.default.synchronize(
+      lambda do
+        "reload_clienti_and_views".post_notification(self, filtro: nil)
+        "reload_cliente".post_notification
+      end,
+      failure:lambda do
+        App.alert "Impossibile salvare dati sul server"
+      end
+    ) 
   end
 
   def applicationWillTerminate(application)

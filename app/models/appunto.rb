@@ -10,21 +10,22 @@ class Appunto < NSManagedObject
 
 
   @attributes = [
-    { name: 'remote_id',    type: NSInteger32AttributeType, default: nil,   optional: true, transient: false, indexed: false},
-    { name: 'ClienteId',    type: NSInteger32AttributeType, default: nil,   optional: true, transient: false, indexed: false},
-    { name: 'status',       type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
-    { name: 'cliente_nome', type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
-    { name: 'destinatario', type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
-    { name: 'note',         type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
-    { name: 'telefono',     type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
-    { name: 'email',        type: NSStringAttributeType,    default: '',  optional: true, transient: false, indexed: false},
-    { name: 'created_at',   type: NSDateAttributeType,    default: nil,  optional: true, transient: false, indexed: false},
-    { name: 'updated_at',   type: NSDateAttributeType,    default: nil,  optional: true, transient: false, indexed: false},
-    { name: 'totale_copie', type: NSInteger32AttributeType, default: 0,   optional: true, transient: false, indexed: false},
+    { name: 'remote_id',    type: NSInteger32AttributeType, default: nil, optional: true, transient: false, indexed: false},
+    { name: 'cliente_id',   type: NSInteger32AttributeType, default: nil, optional: true, transient: false, indexed: false},
+    { name: 'status',       type: NSStringAttributeType,     default: '', optional: true, transient: false, indexed: false},
+    { name: 'cliente_nome', type: NSStringAttributeType,     default: '', optional: true, transient: false, indexed: false},
+    { name: 'destinatario', type: NSStringAttributeType,     default: '', optional: true, transient: false, indexed: false},
+    { name: 'note',         type: NSStringAttributeType,     default: '', optional: true, transient: false, indexed: false},
+    { name: 'telefono',     type: NSStringAttributeType,     default: '', optional: true, transient: false, indexed: false},
+    { name: 'email',        type: NSStringAttributeType,     default: '', optional: true, transient: false, indexed: false},
+    { name: 'created_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'updated_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'deleted_at',   type: NSDateAttributeType,      default: nil, optional: true, transient: false, indexed: false},
+    { name: 'totale_copie', type: NSInteger32AttributeType,   default: 0, optional: true, transient: false, indexed: false},
     { name: 'totale_importo', type: NSDecimalAttributeType, default: 0.0, optional: true, transient: false, indexed: false},
     { name: 'data',           type: NSStringAttributeType,  default: nil, optional: true, transient: true,  indexed: false},
     { name: 'note_e_righe',   type: NSStringAttributeType,  default: nil, optional: true, transient: true,  indexed: false},
-    { name: 'uuid',           type: NSStringAttributeType,  default: nil,  optional: true, transient: false, indexed: false}
+    { name: 'uuid',           type: NSStringAttributeType,  default: nil, optional: true, transient: false, indexed: false}
   ]
 
 
